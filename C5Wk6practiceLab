@@ -1,0 +1,88 @@
+#load .csv files and check them out
+crop_data_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Practice%20Assignment/Annual_Crop_Data.csv"
+cropdf <- read.csv(crop_data_csv, header=FALSE)
+head(cropdf)
+exch_rate_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Practice%20Assignment/Daily_FX.csv"
+exchdf <- read.csv(exch_rate_csv, header=FALSE)
+head(exchdf)
+
+#convert date columns to <chr>
+cropdf$V2 <- as.character(cropdf$V2)
+head(cropdf)
+exchdf$V2 <- as.character(exchdf$V2)
+head(exchdf)
+
+#connect to db via RODBC
+#Load RODBC library
+library(RODBC)
+
+#DB connection string variables
+dsn_driver = "IBM DB2 ODBC DRIVER" #found this connection string on connectionstrings.com
+dsn_database = "bludb"            
+dsn_hostname = "b0aebb68-94fa-46ec-a1fc-1c999edb6187.c3n41cmd0nqnrk39u98g.databases.appdomain.cloud"    #from my db instance
+dsn_port = "31249"  #from my db instance
+dsn_protocol = "TCPIP"            
+dsn_uid = "nhl79077"  #from my db instance
+dsn_pwd = "xacZ3RkpGprJW4Nj"  #from my db instance credentials
+dsn_security = "ssl"
+
+#DB connection string and connection
+conn_path = paste("DRIVER=",dsn_driver,
+                  ";DATABASE=",dsn_database,
+                  ";HOSTNAME=",dsn_hostname,
+                  ";PORT=",dsn_port,
+                  ";PROTOCOL=",dsn_protocol,
+                  ";UID=",dsn_uid,
+                  ";PWD=",dsn_pwd,
+                  ";SECURITY=",dsn_security,        
+                    sep="")
+conn = odbcDriverConnect(conn_path)
+conn
+#returns connection details
+
+#view DB and driver information
+sqlinfo <- sqlTypeInfo(conn)
+conninfo <- odbcGetInfo(conn)
+conninfo["DBMS_Name"]
+conninfo["DBMS_Ver"] 
+conninfo["Driver_ODBC_Ver"]
+#returns info
+
+#check whether tables named CROP_DATA and DAILY_FX already exist in the database, and drop if so
+myschema <- "NHL79077" #from my db instance
+tables <- c("CROP_DATA", "DAILY_FX")
+for (table in tables){  
+    out <- sqlTables(conn, tableType = "TABLE", schema = myschema, tableName =table)
+      if (nrow(out)>0) {
+        err <- sqlDrop (conn, paste(myschema,".",table,sep=""), errors=FALSE)  
+        if (err==-1){
+          cat("An error has occurred.\n")
+          err.msg <- odbcGetErrMsg(conn)
+          for (error in err.msg) {
+            cat(error,"\n")
+          }
+        } else {
+          cat ("Table: ",table," just got dropped!\n")
+        }
+      } else {
+          cat ("What made you think", table," existed anyway?\n")
+      }
+    }
+
+#Create CROP_DATA table in database 
+df1 <- sqlQuery(conn, "CREATE TABLE CROP_DATA (
+                            B_ID CHAR(6) NOT NULL, 
+                            B_NAME VARCHAR(75) NOT NULL, 
+                            TYPE VARCHAR(50) NOT NULL, 
+                            LANGUAGE VARCHAR(50), 
+                            PRIMARY KEY (B_ID))", 
+                errors=FALSE)
+
+#check if CROP_DATA table created successfully
+if (df1 == -1){
+  cat ("An error has occurred.\n")
+  msg <- odbcGetErrMsg(conn)
+  print (msg)
+} else {
+  cat ("CROP_DATA table was created successfully.\n")
+}
