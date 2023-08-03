@@ -1,14 +1,14 @@
 #Load RODBC library
-library(RODBC);
+library(RODBC)
 
 #DB connection string variables
-dsn_driver = "IBM DB2 ODBC DRIVER"
+dsn_driver = "IBM DB2 ODBC DRIVER" #found this connection string on connectionstrings.com
 dsn_database = "bludb"            
-dsn_hostname = "b0aebb68-94fa-46ec-a1fc-1c999edb6187.c3n41cmd0nqnrk39u98g.databases.appdomain.cloud"   
-dsn_port = "31249"                    
+dsn_hostname = "b0aebb68-94fa-46ec-a1fc-1c999edb6187.c3n41cmd0nqnrk39u98g.databases.appdomain.cloud"    #from my db instance
+dsn_port = "31249"  #from my db instance
 dsn_protocol = "TCPIP"            
-dsn_uid = "nhl79077"            
-dsn_pwd = "xacZ3RkpGprJW4Nj"            
+dsn_uid = "nhl79077"  #from my db instance
+dsn_pwd = "xacZ3RkpGprJW4Nj"  #from my db instance credentials
 dsn_security = "ssl"
 
 #DB connection string and connection
@@ -23,12 +23,7 @@ conn_path = paste("DRIVER=",dsn_driver,
                     sep="")
 conn = odbcDriverConnect(conn_path)
 conn
-
-#close all connections
-odbcCloseAll()
-
-#close a specific connection
-close(connection_name)
+#returns connection details
 
 #view DB and driver information
 sqlinfo <- sqlTypeInfo(conn)
@@ -36,14 +31,14 @@ conninfo <- odbcGetInfo(conn)
 conninfo["DBMS_Name"]
 conninfo["DBMS_Ver"] 
 conninfo["Driver_ODBC_Ver"]
+#returns info
 
-#drop tables in case they exist
-myschema <- "NHL79077" # e.g. "ZJH17769"
+#drop tables in case they exist (with a for loop rather than doing individually, 
+#also continues code even if table doesn't exist
+myschema <- "NHL79077" #from my db instance
 tables <- c("BOARD", "SCHOOL")
-    
-    for (table in tables){  
-      # Drop School table if it already exists
-      out <- sqlTables(conn, tableType = "TABLE", schema = myschema, tableName =table)
+for (table in tables){  
+    out <- sqlTables(conn, tableType = "TABLE", schema = myschema, tableName =table)
       if (nrow(out)>0) {
         err <- sqlDrop (conn, paste(myschema,".",table,sep=""), errors=FALSE)  
         if (err==-1){
@@ -60,7 +55,7 @@ tables <- c("BOARD", "SCHOOL")
       }
     }
 
-#Create BOARD table in database
+#Create BOARD table in database 
 df1 <- sqlQuery(conn, "CREATE TABLE BOARD (
                             B_ID CHAR(6) NOT NULL, 
                             B_NAME VARCHAR(75) NOT NULL, 
@@ -69,8 +64,7 @@ df1 <- sqlQuery(conn, "CREATE TABLE BOARD (
                             PRIMARY KEY (B_ID))", 
                 errors=FALSE)
 
-
-#check if table created successfully
+#check if BOARD table created successfully
 if (df1 == -1){
   cat ("An error has occurred.\n")
   msg <- odbcGetErrMsg(conn)
@@ -88,8 +82,7 @@ df2 <- sqlQuery(conn, "CREATE TABLE SCHOOL (
                   ENROLLMENT INTEGER WITH DEFAULT 10,
                   PRIMARY KEY (B_ID, S_ID))", errors=FALSE)
 
-
-#check if table created successfully
+#check if SCHOOL table created successfully
 if (df2 == -1){
   cat ("An error has occurred.\n")
   msg <- odbcGetErrMsg(conn)
@@ -102,6 +95,7 @@ if (df2 == -1){
 tab.frame <- sqlTables(conn, schema=myschema)
 nrow(tab.frame)
 tab.frame$TABLE_NAME
+#returns list of tables from my db instance, including the newly created SCHOOL and BOARD tables
 
 #print col #4, 6, 7, 18 from both tables
 for (table in tables){  
@@ -109,11 +103,11 @@ for (table in tables){
         col.detail <- sqlColumns(conn, table)
         print(col.detail[c(4,6,7,18)], row.names=FALSE)
 }
+#returns col names, char type, etc
 
-#load data from the board.csv into the BOARD data frame (these are the "solution")
-boarddf <- read.csv("/resources/data/samples/osb/board.csv", header = FALSE)
-
-#it worked when I did 
+#load data from the board.csv into the BOARD data frame (this is the official "solution" which doesn't work)
+#boarddf <- read.csv("/resources/data/samples/osb/board.csv", header = FALSE)
+#but I just used the url for the files since they were hosted online
 board_csv_string <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-RP0103EN-SkillsNetwork/labs/Lab%20-%20Creating%20and%20Querying%20Database%20Objects%20from%20R/board.csv"
 boarddf <- read.csv(board_csv_string, header = FALSE)
 
@@ -125,9 +119,10 @@ school_csv_string <- "https://cf-courses-data.s3.us.cloud-object-storage.appdoma
 schooldf <- read.csv(school_csv_string, header=FALSE)
 
 #change the encoding from the 3rd column char vector from "latin1" to "ASCII//TRANSLIT"
+#I don't understand the point of this conversion
 schooldf$V3 <- iconv(schooldf$V3, "latin1", "ASCII//TRANSLIT")
 
-#save the data from to the database table SCHOOL (note, this takes a long time b/c there is a lot of data. may be better to use native LOAD utility in the database 
+#save the data from to the database table SCHOOL (note, this took a few minutes b/c there is a lot of data. may be better to use native LOAD utility in the database 
 sqlSave(conn, schooldf, "SCHOOL", append=TRUE, fast=FALSE, rownames=FALSE, colnames=FALSE, verbose=FALSE)
 
 #fetch data from the db table BOARD and SCHOOL
@@ -137,7 +132,9 @@ schooldb <- sqlFetch(conn, "SCHOOL")
 #open ggplot2 library
 library(ggplot2)
 
-#get elementary school data from the db in both tables in descending sequence
+#get elementary school data from both tables in the DB, only for b_name Toronto DSB, and in descending sequence
+#I don't understand the purpose of the "elequery <- query <- paste()"
+#I believe it is a typo
 elequery <- query <- paste("select s.enrollment as ENROLLMENT 
 from school s, board b 
 where b.b_name = 'Toronto DSB' and b.b_id=s.b_id 
@@ -173,6 +170,11 @@ denquery <- paste("select b.b_name, s.s_name, level as LEVEL, enrollment
 dendf <- sqlQuery(conn, denquery)
 
 
+#close all connections
+odbcCloseAll()
+
+#close a specific connection
+close(conn)
 
 
 
