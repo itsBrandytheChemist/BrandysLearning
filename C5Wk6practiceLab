@@ -131,14 +131,14 @@ sqlQuery=(conn, query)
 #Close result 1: I was able to make the table of crops having avg_yield >= 3000 and the avg(avg_yield) for all rows:
 query = 
 "select distinct(CROP_TYPE),
-                (SELECT AVG(AVG_YIELD) FROM CROP_DATA)
+                (SELECT AVG(AVG_YIELD) AS AVG FROM CROP_DATA)
         from CROP_DATA
         where AVG_YIELD >= 3000;"
 sqlQuery=(conn, query)
 #Turns out this snippet has the same result:
 query = 
 "select CROP_TYPE,
-                (SELECT AVG(AVG_YIELD) FROM CROP_DATA)
+                (SELECT AVG(AVG_YIELD) AS AVG FROM CROP_DATA)
         from CROP_DATA
         where AVG_YIELD >= 3000
         group by CROP_TYPE;"
@@ -146,8 +146,33 @@ sqlQuery=(conn, query)
 
 #Close result 2: I was able to make a table of ALL crops and their avg(avg_yield):
 query = 
-"select CROP_TYPE, AVG(AVG_YIELD) FROM CROP_DATA
+"select CROP_TYPE, AVG(AVG_YIELD) AS AVG FROM CROP_DATA
         group by CROP_TYPE;"
 sqlQuery=(conn, query)
 
+#As a side note, I was able test when you do/don't need nested select for aggregate functions
+#I think you can only select an aggregate function AVG() along with another column if there is a GROUP BY clause
+#the following code will fail for this reason, but works if you add GROUP BY CROP_TYPE
+query = 
+"SELECT CROP_TYPE, AVG(AVG_YIELD) AS AVG FROM CROP_DATA"
+sqlQuery(conn, query)
+
+#Select top 10 years of wheat production in Saskatchewan in terms of harvested area
+query = 
+"SELECT YEAR, HARVESTED_AREA FROM CROP_DATA
+        WHERE GEO='Saskatchewan'
+        ORDER BY HARVESTED_AREA DESC
+        LIMIT 10"
+sqlQuery(conn, query)
+
+#How much farmland in Alberta was seeded with Barley but not harvested each year since 2000?
+#express in % seeded area that was harvested
+query <-  
+"SELECT YEAR(YEAR) AS YEAR, 
+            100*(SEEDED_AREA-HARVESTED_AREA)/SEEDED_AREA AS PCT_UNHARVESTED_AREA
+    FROM CROP_DATA
+    WHERE YEAR(YEAR) >= 2000 AND
+          GEO = 'Alberta' AND
+          CROP_TYPE = 'Barley';"
+sqlQuery(conn,query)
 
