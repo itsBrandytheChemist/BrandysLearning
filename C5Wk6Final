@@ -86,7 +86,52 @@ for(dataframe in dfs){
 head(dataframe)
 }
 
-
-
 colnames(Annual_Crop_Data)[2] <- "DATE"
+
+
+#last problem...
+#This works, but shows all dates, not just last 6 mo
+#I also think the nested select is overkill
+query <-
+"SELECT DATE, PRICE_PRERMT AS PRICE_CAD, MFXUSDCAD, PRICE_PRERMT/MFXUSDCAD AS PRICE_USD FROM 
+                        (SELECT F.*, M.MFXUSDCAD FROM FARM_PRICES F, MONTHLY_FX M
+                        WHERE F.DATE=M.DATE
+                        AND UCASE(CROP_TYPE)='CANOLA'
+                        AND UCASE(GEO)='SASKATCHEWAN')"
+sqlQuery(conn, query)
+
+#yep, I didn't need that
+query <-
+"SELECT F.DATE, M.MFXUSDCAD, F.PRICE_PRERMT AS PRICE_CAD, F.PRICE_PRERMT/M.MFXUSDCAD AS PRICE_USD 
+        FROM FARM_PRICES F, MONTHLY_FX M
+        WHERE F.DATE=M.DATE
+        AND UCASE(CROP_TYPE)='CANOLA'
+        AND UCASE(GEO)='SASKATCHEWAN'"
+sqlQuery(conn, query)
+
+#now to figure out how to limit the date
+#this gives date = max date
+query <-
+"SELECT F.DATE, M.MFXUSDCAD, F.PRICE_PRERMT AS PRICE_CAD, F.PRICE_PRERMT/M.MFXUSDCAD AS PRICE_USD 
+        FROM FARM_PRICES F, MONTHLY_FX M
+        WHERE F.DATE=M.DATE
+        AND UCASE(CROP_TYPE)='CANOLA'
+        AND UCASE(GEO)='SASKATCHEWAN'
+        AND F.DATE = 
+            (SELECT MAX(DATE) FROM FARM_PRICES)"
+sqlQuery(conn, query)
+
+
+
+
+
+
+#this gives integer columns for year and month
+query=
+"SELECT F.DATE, YEAR(F.DATE) AS YR, MONTH(F.DATE) AS MTH, M.MFXUSDCAD, F.PRICE_PRERMT AS PRICE_CAD, F.PRICE_PRERMT/M.MFXUSDCAD AS PRICE_USD FROM FARM_PRICES F, MONTHLY_FX M
+    WHERE F.DATE=M.DATE
+    AND UCASE(CROP_TYPE)='CANOLA'
+    AND UCASE(GEO)='SASKATCHEWAN'"
+sqlQuery(conn, query)
+
 
