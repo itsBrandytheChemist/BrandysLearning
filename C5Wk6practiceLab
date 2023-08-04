@@ -102,7 +102,7 @@ if (cropdf == -1){
 fxdf <- sqlQuery(conn, "CREATE TABLE DAILY_FX (
                             DFX_ID INTEGER NOT NULL, 
                             DATE CHAR(10) NOT NULL, 
-                            FIXUSDCAD INTEGER,
+                            FXUSDCAD FLOAT,
                             PRIMARY KEY (DFX_ID))", 
                 errors=FALSE)
 #check if DAILY_FX table created successfully
