@@ -5,7 +5,6 @@ head(cropdf)
 exch_rate_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Practice%20Assignment/Daily_FX.csv"
 exchdf <- read.csv(exch_rate_csv, header=FALSE)
 head(exchdf)
-
 #discovered column names were in first row --> make names out of that row, then delete it
 names(cropdf) <-as.matrix(cropdf[1,])
 cropdf <- (cropdf[-1,])
@@ -13,12 +12,17 @@ head(cropdf)
 names(exchdf) <-as.matrix(exchdf[1,])
 exchdf <- (exchdf[-1,])
 head(exchdf)
-
 #convert date columns to <chr>
 cropdf$V2 <- as.character(cropdf$V2)
 head(cropdf)
 exchdf$V2 <- as.character(exchdf$V2)
 head(exchdf)
+
+#OR this is the solution given:
+crop_df <- read.csv('https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/Annual_Crop_Data.csv', colClasses=c(YEAR="character"))
+    fx_df <- read.csv('https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/Daily_FX.csv', colClasses=c(date="character"))
+    head(crop_df)
+    head(fx_df)
 
 #connect to db via RODBC
 #Load RODBC library
@@ -128,6 +132,7 @@ sqlQuery=(conn, query)
 
 #then on my own I felt like trying to show the above result but adding a column showing the avg(avg_yield) for each crop type
 #I didn't get there, but I got close...
+#when I come back to this, look at derived table
 #Close result 1: I was able to make the table of crops having avg_yield >= 3000 and the avg(avg_yield) for all rows:
 query = 
 "select distinct(CROP_TYPE),
@@ -176,3 +181,19 @@ query <-
           CROP_TYPE = 'Barley';"
 sqlQuery(conn,query)
 
+#use inner implicit join to show the crop data with an FX column included (use FXUSDCAD from 12/31 of the year)
+query <-
+"SELECT c.*, f.FXUSDCAD, f.DATE from CROP_DATA c, DAILY_FX f
+    WHERE c.YEAR = f.DATE"
+sqlQuery(conn, query)
+#this works because I knew c.YEAR was all from 12/31
+#if I didn't know that and just wanted to select 12/31 data from DAILY_FX:
+query <-
+"SELECT c.*, f.FXUSDCAD, f.DATE from CROP_DATA c, DAILY_FX f
+    WHERE YEAR(c.YEAR) = YEAR(f.DATE)
+    AND MONTH(f.DATE) = '12'
+    AND DAY(f.DATE) = '31'
+    LIMIT 5"
+sqlQuery(conn, query)
+
+   
