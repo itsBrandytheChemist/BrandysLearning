@@ -1,0 +1,30 @@
+#original code to load csv into dataframes. it works
+
+crop_data_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/Annual_Crop_Data.csv"
+cropdf <- read.csv(crop_data_csv, header=FALSE)
+names(cropdf) <- as.matrix(cropdf[1,])
+cropdf <- (cropdf[-1,])
+colnames(cropdf)[2] <- "DATE"
+cropdf$DATE <- as.character(cropdf$DATE)
+head(cropdf)
+
+farm_prices_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/Monthly_Farm_Prices.csv"
+farmdf <- read.csv(farm_prices_csv, header=FALSE)
+names(farmdf) <- as.matrix(farmdf[1,])
+farmdf <- (farmdf[-1,])
+farmdf$DATE <- as.character(farmdf$DATE)
+head(farmdf)
+
+daily_fx_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/Daily_FX.csv"
+dailydf <- read.csv(daily_fx_csv, header=FALSE)
+names(dailydf) <- as.matrix(dailydf[1,])
+dailydf <- (dailydf[-1,])
+dailydf$DATE <- as.character(dailydf$DATE)
+head(dailydf)
+
+monthly_fx_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/Monthly_FX.csv"
+monthlydf <- read.csv(monthly_fx_csv, header=FALSE)
+names(monthlydf) <- as.matrix(monthlydf[1,])
+monthlydf <- (monthlydf[-1,])
+monthlydf$DATE <- as.character(monthlydf$DATE)
+head(monthlydf)
