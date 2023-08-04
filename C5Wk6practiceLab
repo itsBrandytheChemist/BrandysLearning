@@ -115,7 +115,39 @@ if (fxdf == -1){
 }
 
 #load data from cropdf and exchdf (R dataframes) into CROP_DATA and DAILY_FX (db tables)
+
 sqlSave(conn, cropdf, "CROP_DATA", append=TRUE, fast=FALSE, rownames=FALSE, colnames=FALSE, verbose=FALSE)
 sqlSave(conn, exchdf, "DAILY_FX", append=TRUE, fast=FALSE, rownames=FALSE, colnames=FALSE, verbose=FALSE)
 
 #followed by so many SQL practice queries
+#which crops had avg_yield >= 3000?
+query = 
+"select distinct(CROP_TYPE) from CROP_DATA
+    WHERE AVG_YIELD >= 3000"
+sqlQuery=(conn, query)
+
+#then on my own I felt like trying to show the above result but adding a column showing the avg(avg_yield) for each crop type
+#I didn't get there, but I got close...
+#Close result 1: I was able to make the table of crops having avg_yield >= 3000 and the avg(avg_yield) for all rows:
+query = 
+"select distinct(CROP_TYPE),
+                (SELECT AVG(AVG_YIELD) FROM CROP_DATA)
+        from CROP_DATA
+        where AVG_YIELD >= 3000;"
+sqlQuery=(conn, query)
+#Turns out this snippet has the same result:
+query = 
+"select CROP_TYPE,
+                (SELECT AVG(AVG_YIELD) FROM CROP_DATA)
+        from CROP_DATA
+        where AVG_YIELD >= 3000
+        group by CROP_TYPE;"
+sqlQuery=(conn, query)
+
+#Close result 2: I was able to make a table of ALL crops and their avg(avg_yield):
+query = 
+"select CROP_TYPE, AVG(AVG_YIELD) FROM CROP_DATA
+        group by CROP_TYPE;"
+sqlQuery=(conn, query)
+
+
