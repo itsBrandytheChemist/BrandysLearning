@@ -6,6 +6,14 @@ exch_rate_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.c
 exchdf <- read.csv(exch_rate_csv, header=FALSE)
 head(exchdf)
 
+#discovered column names were in first row --> make names out of that row, then delete it
+names(cropdf) <-as.matrix(cropdf[1,])
+cropdf <- (cropdf[-1,])
+head(cropdf)
+names(exchdf) <-as.matrix(exchdf[1,])
+exchdf <- (exchdf[-1,])
+head(exchdf)
+
 #convert date columns to <chr>
 cropdf$V2 <- as.character(cropdf$V2)
 head(cropdf)
@@ -105,3 +113,9 @@ if (fxdf == -1){
 } else {
   cat ("DAILY_FX table was created successfully.\n")
 }
+
+#load data from cropdf and exchdf (R dataframes) into CROP_DATA and DAILY_FX (db tables)
+sqlSave(conn, cropdf, "CROP_DATA", append=TRUE, fast=FALSE, rownames=FALSE, colnames=FALSE, verbose=FALSE)
+sqlSave(conn, exchdf, "DAILY_FX", append=TRUE, fast=FALSE, rownames=FALSE, colnames=FALSE, verbose=FALSE)
+
+#followed by so many SQL practice queries
