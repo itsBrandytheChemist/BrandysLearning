@@ -29,7 +29,24 @@ monthlydf <- (monthlydf[-1,])
 monthlydf$DATE <- as.character(monthlydf$DATE)
 head(monthlydf)
 
+#shorter way
+cropdf_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/Annual_Crop_Data.csv"
+farmdf_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/Monthly_Farm_Prices.csv"
+dailydf_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/Daily_FX.csv"
+monthlydf_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/Monthly_FX.csv"
 
+cropdf <- read.csv(cropdf_csv, colClasses=c(YEAR="character"))
+colnames(cropdf)[2] <- "DATE"
+farmdf <- read.csv(farmdf_csv,colClasses=c(DATE="character"))
+colnames(farmdf)[1] <- "FP_ID"
+dailydf <- read.csv(dailydf_csv, colClasses=c(DATE="character"))
+monthlydf <- read.csv(monthlydf_csv, colClasses=c(DATE="character"))
+colnames(monthlydf)[1] <- "MFX_ID"
+
+head(cropdf)
+head(farmdf)
+head(dailydf)
+head(monthlydf)
 
 
 #was hoping to do it with a for loop instead
@@ -53,4 +70,23 @@ head(dataframe)
 }
 
 #colnames(cropdf)[2] <- "DATE"
+
+#FOR loop attempt #2 - pretty close but I want it to show the head(dataframe) and it doesn't
+filepath <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/"
+
+
+dfs <- c("Annual_Crop_Data", "Monthly_Farm_Prices", "Daily_FX", "Monthly_FX")
+for(dataframe in dfs){
+    #filename <- paste(filepath, dataframe, sep="") 
+    #print(filename)
+    dataframe <- read.csv(paste(filepath, dataframe, ".csv", sep=""), header=TRUE)
+     names(dataframe) <- as.matrix(dataframe[1,])
+    dataframe <- (dataframe[-1,])
+    dataframe[2] <- as.character(dataframe[2])
+head(dataframe)
+}
+
+
+
+colnames(Annual_Crop_Data)[2] <- "DATE"
 
