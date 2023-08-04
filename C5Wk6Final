@@ -28,3 +28,29 @@ names(monthlydf) <- as.matrix(monthlydf[1,])
 monthlydf <- (monthlydf[-1,])
 monthlydf$DATE <- as.character(monthlydf$DATE)
 head(monthlydf)
+
+
+
+
+#was hoping to do it with a for loop instead
+#but it doesn't work (“cannot open file 'cropdf_csv': No such file or directory”)
+
+
+cropdf_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/Annual_Crop_Data.csv"
+farmdf_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/Monthly_Farm_Prices.csv"
+dailydf_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/Daily_FX.csv"
+monthlydf_csv <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-RP0203EN-SkillsNetwork/labs/Final%20Project/Monthly_FX.csv"
+
+dfs <- c("cropdf", "farmdf", "dailydf", "monthlydf")
+for(dataframe in dfs){
+    #filename <- paste(dataframe, "_csv", sep="") 
+    #print(filename)
+    dataframe <- read.csv(paste(dataframe, "_csv", sep=""), header=FALSE)
+     names(dataframe) <- as.matrix(dataframe[1,])
+    dataframe <- (dataframe[-1,])
+    dataframe[2] <- as.character(dataframe[2])
+head(dataframe)
+}
+
+#colnames(cropdf)[2] <- "DATE"
+
