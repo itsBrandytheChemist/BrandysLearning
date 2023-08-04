@@ -70,19 +70,38 @@ for (table in tables){
     }
 
 #Create CROP_DATA table in database 
-df1 <- sqlQuery(conn, "CREATE TABLE CROP_DATA (
-                            B_ID CHAR(6) NOT NULL, 
-                            B_NAME VARCHAR(75) NOT NULL, 
-                            TYPE VARCHAR(50) NOT NULL, 
-                            LANGUAGE VARCHAR(50), 
-                            PRIMARY KEY (B_ID))", 
+cropdf <- sqlQuery(conn, "CREATE TABLE CROP_DATA (
+                            CD_ID INTEGER NOT NULL, 
+                            YEAR CHAR(10) NOT NULL, 
+                            CROP_TYPE VARCHAR(50) NOT NULL, 
+                            GEO VARCHAR(50),
+                            SEEDED_AREA INTEGER,
+                            HARVESTED_AREA INTEGER,
+                            PRODUCTION INTEGER,
+                            AVG_YIELD INTEGER,
+                            PRIMARY KEY (CD_ID))", 
                 errors=FALSE)
-
 #check if CROP_DATA table created successfully
-if (df1 == -1){
+if (cropdf == -1){
   cat ("An error has occurred.\n")
   msg <- odbcGetErrMsg(conn)
   print (msg)
 } else {
   cat ("CROP_DATA table was created successfully.\n")
+}
+
+#Create DAILY_FX table in database
+fxdf <- sqlQuery(conn, "CREATE TABLE DAILY_FX (
+                            DFX_ID INTEGER NOT NULL, 
+                            DATE CHAR(10) NOT NULL, 
+                            FIXUSDCAD INTEGER,
+                            PRIMARY KEY (DFX_ID))", 
+                errors=FALSE)
+#check if DAILY_FX table created successfully
+if (fxdf == -1){
+  cat ("An error has occurred.\n")
+  msg <- odbcGetErrMsg(conn)
+  print (msg)
+} else {
+  cat ("DAILY_FX table was created successfully.\n")
 }
