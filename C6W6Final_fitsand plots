@@ -1,0 +1,12 @@
+#Fits and plots: 
+#df="weather_training"
+#df variables="relative_humidity", "dry_bulb_temp_f", "precip", "wind_speed", and "station_pressure"
+
+#Find ranges of all variables to help with plotting:
+sapply(weather_training, range, na.rm=TRUE)
+
+#Quick Histogram of data from one column (I set x limits based on range of data)
+ggplot(data=weather_training, mapping=aes(x=relative_humidity))+
+  geom_histogram(bins=50, color="white", fill="red")+
+  coord_cartesian(xlim=c(10,110))
+
