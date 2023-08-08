@@ -98,6 +98,11 @@ unique(sub_weather$HOURLYPrecip)
     #Attempt 9. Back to basics.
     clean_weather["HOURLYPrecip"][clean_weather["HOURLYPrecip"] == "T"] <- "0"
         #and it worked
+    clean_weather["HOURLYPrecip"] <- gsub("T", 0, clean_weather$HOURLYPrecip)
+        #also works
 
-    #So now, let's try removing those "s"s from above:
-    clean_weather["HOURLYPrecip"][clean_weather["HOURLYPrecip
+    #So now, let's try removing those "s"s from above. Both of these worked.
+    clean_weather["HOURLYPrecip"] <- gsub("s$", "", clean_weather$HOURLYPrecip)
+    clean_weather["HOURLYPrecip"] <- str_remove(clean_weather$HOURLYPrecip, "s$")
+
+
