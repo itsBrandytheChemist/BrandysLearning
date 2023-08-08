@@ -20,7 +20,43 @@ unique(sub_weather$HOURLYPrecip)
 
     
 
-#Clean HOURLYPrecip column (replace T with 0.0 and remove s)
-sub_weather_clean <- sub_weather %>%
-  select(HOURLYPrecip)%>%
-  mutate_if("T", 0.0, .keep="used")
+#Clean HOURLYPrecip column (replace T with 0.0)
+
+    #Code I used in a different lab
+    date_airline %>%
+        select(year, month, day) %>%
+            #mutate_all is to change multiple columns
+            mutate_all(type.convert) %>%
+            #mutate_if(table, predicate, function/s)
+            mutate_if(is.character, as.numeric)
+    #note that it seems to change the dataframe itself
+
+    #Attempt 1
+    clean_weather <- sub_weather
+    clean_weather %>% 
+        select(HOURLYPrecip) %>% 
+        mutate(HOURLYPrecip) %>% 
+        mutate_if(HOURLYPrecip="T", 0)
+            #returns error: Error in `tbl_if_vars()`:! Can't convert `.p`, a double vector, to a function.
+
+    #Attempt 2
+    clean_weather <- sub_weather
+    clean_weather %>% 
+        select(HOURLYPrecip) %>% 
+        mutate_if(HOURLYPrecip="T", 0)
+            #returns same error
+
+    #Attempt 3, not that I think this is going to work
+    clean_weather <- sub_weather
+    clean_weather %>% 
+        select(HOURLYPrecip) %>% 
+        mutate_if(HOURLYPrecip="T", HOURLYPrecip=0)
+            #new error: Error in manip_if(.tbl, .predicate, .funs, enquo(.funs), caller_env(),  : 
+            #argument ".predicate" is missing, with no default
+
+    #Attempt 4
+    clean_weather <- sub_weather
+    clean_weather %>% 
+        select(HOURLYPrecip) %>% 
+        mutate_if("T", 0)
+    
