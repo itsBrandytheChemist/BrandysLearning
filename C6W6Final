@@ -1,0 +1,26 @@
+#Inspect unique values
+unique(sub_weather$HOURLYPrecip)
+#found some column entries = T (meaning 'trace') and some numerical but with an ending "s" (like 0.2s, meaning snow)
+
+#Clean HOURLYPrecip column (remove "s" at the end of some values)
+    #Hint in instructions is to use str_remove(column, pattern="s$")
+  
+    #Attempt 1 
+    clean_weather <- str_remove(sub_weather$HOURLYPrecip, pattern="s$")
+      #this returned a LIST with ONLY the HOURLYPrecip column (but the "s" were all gone)
+
+    #Attempt 2
+    clean_weather$HOURLYPrecip <- str_remove(sub_weather$HOURLYPrecip, pattern="s$")
+      #this returned a weird LIST with each item a list (with only one item) from the HOURLYPrecip column (but the "s" were all gone)
+
+    #Attempt 3 
+    clean_weather <- sub_weather
+    str_remove(clean_weather$HOURLYPrecip, pattern="s$")
+     #NOPE
+
+    
+
+#Clean HOURLYPrecip column (replace T with 0.0 and remove s)
+sub_weather_clean <- sub_weather %>%
+  select(HOURLYPrecip)%>%
+  mutate_if("T", 0.0, .keep="used")
