@@ -18,16 +18,26 @@ unique(sub_weather$HOURLYPrecip)
     str_remove(clean_weather$HOURLYPrecip, pattern="s$")
      #NOPE
 
-    
 
 #Clean HOURLYPrecip column (replace T with 0.0)
+    #mutate() syntax: mutate(colname = what to put in col)
+        #if colname is existing, it changes it. if colname does not exist, makes a new one
+    #mutate_if(table, predicate, function/s)
+        #in example below, the table parameter is left out (presumably because of select()?)
+        #all examples they show, the predicate is "is.na", so I'm not sure
+            #how to make an equivalent statement for 'equals the character T'
+            #predicate returns TRUE or FALSE, so I'd think I could use "='T'"?
+            #predicate is passed to rlang::as_function() which converts a one-sided formula into a function
+                #syntax: as_function(x)
+                    # x is function, formula, or string (I think this is only a string referring to a function)
+    #according to https://dplyr.tidyverse.org/reference/mutate_all.html, 
+    #mutate_all and mutate_if have been superceded by other functions, so...
 
     #Code I used in a different lab
     date_airline %>%
         select(year, month, day) %>%
             #mutate_all is to change multiple columns
             mutate_all(type.convert) %>%
-            #mutate_if(table, predicate, function/s)
             mutate_if(is.character, as.numeric)
     #note that it seems to change the dataframe itself
 
@@ -51,12 +61,43 @@ unique(sub_weather$HOURLYPrecip)
     clean_weather %>% 
         select(HOURLYPrecip) %>% 
         mutate_if(HOURLYPrecip="T", HOURLYPrecip=0)
-            #new error: Error in manip_if(.tbl, .predicate, .funs, enquo(.funs), caller_env(),  : 
-            #argument ".predicate" is missing, with no default
+            #Error in manip_if(.tbl, .predicate, .funs, enquo(.funs), caller_env(),  : 
+                #argument ".predicate" is missing, with no default
 
     #Attempt 4
     clean_weather <- sub_weather
     clean_weather %>% 
         select(HOURLYPrecip) %>% 
-        mutate_if("T", 0)
-    
+        mutate_if(="T", 0)
+            #Error: unexpected '=' in:"select(HOURLYPrecip) %>% mutate_if(="
+
+    #Attempt 5
+    clean_weather <- sub_weather
+    clean_weather %>% mutate_if(HOURLYPrecip="T", HOURLYPrecip=0)
+        #error: Error in manip_if(.tbl, .predicate, .funs, enquo(.funs), caller_env(),  : 
+            #argument ".predicate" is missing, with no default
+
+    #Attempt 6
+    clean_weather <- sub_weather
+    clean_weather %>% mutate_if(HOURLYPrecip="T", 0)
+        #Error in `tbl_if_vars()`: ! Can't convert `.p`, a double vector, to a function.
+        #Run `rlang::last_trace()` to see where the error occurred.
+
+    #Attempt 7. I think the predicate "HOURLYPrecip='T'" is correct, 
+        #as this is the way to return TRUE/FALSE for each member in a vector (which is what a df column is)
+    mutate_if(clean_weather, HOURLYPrecip="T", 0)
+        #Error in `tbl_if_vars()`: ! Can't convert `.p`, a double vector, to a function.
+
+    #Attempt 8.
+    mutate_if(clean_weather, HOURLYPrecip="T", "0")
+        #Error in get(x, envir = env, mode = "function") : 
+          #object '0' of mode 'function' was not found
+
+    #Then I realized I should have used "==" in all of these, not "=", but it still didn't work
+
+    #Attempt 9. Back to basics.
+    clean_weather["HOURLYPrecip"][clean_weather["HOURLYPrecip"] == "T"] <- "0"
+        #and it worked
+
+    #So now, let's try removing those "s"s from above:
+    clean_weather["HOURLYPrecip"][clean_weather["HOURLYPrecip
