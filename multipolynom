@@ -1,0 +1,26 @@
+#creating a df with polynomials of some variables
+NA_training2 <- NA_training
+NA_training2 <- NA_training2 %>% mutate(rel_hum_2=relative_humidity^2)
+NA_training2 <- NA_training2 %>% mutate(rel_hum_3=relative_humidity^3)
+NA_training2 <- NA_training2 %>% mutate(rel_hum_4=relative_humidity^4)
+NA_training2 <- NA_training2 %>% mutate(pressure2=station_pressure^2)
+NA_training2 <- NA_training2 %>% mutate(pressure3=station_pressure^3)
+NA_training2 <- NA_training2 %>% mutate(pressure4=station_pressure^4)
+
+head(NA_training2)
+
+mlr_NA_poly4hum_poly4press <- lm(precip ~ relative_humidity + rel_hum_2 +
+                                   rel_hum_3+ rel_hum_4 + station_pressure +
+                                   pressure2 + pressure3 + pressure4,
+                                 data=NA_training2)
+summary(mlr_NA_poly4hum_poly4press)
+plot(mlr_NA_poly4hum_poly4press)
+ggplot(data=NA_training2, aes(precip, ))
+
+#some of the points were outliers so I deleted rows (make new NA_training2 if you want them back
+NA_training2 <- NA_training2[-c(1041),]
+
+
+
+
+    
