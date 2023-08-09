@@ -1,12 +1,21 @@
 #Fits and plots: 
 #df="weather_training"
-#df variables="relative_humidity", "dry_bulb_temp_f", "precip", "wind_speed", and "station_pressure"
+#target_variable="precip"
+#other variables="relative_humidity", "dry_bulb_temp_f", "wind_speed", and "station_pressure"
+
+#First, decide how to handle NAs.
+
 
 #Find ranges of all variables to help with plotting:
-sapply(weather_training, range, na.rm=TRUE)
+sapply(weather_training, range)
+#sapply(weather_training, range, na.rm=TRUE) to omit NA values
 
 #Quick Histogram of data from one column (I set x limits based on range of data)
 ggplot(data=weather_training, mapping=aes(x=relative_humidity))+
   geom_histogram(bins=50, color="white", fill="red")+
   coord_cartesian(xlim=c(10,110))
 
+dataframe %>%
+	ggplot(aes(x=factor 1, y=factor2, fill=target))+
+	geom_tile(color= ”white”, size=0.2)+
+	scale_fill_gradient(low= ”yellow” high= ”red”
