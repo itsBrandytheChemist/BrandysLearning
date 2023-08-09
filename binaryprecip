@@ -1,0 +1,30 @@
+#Creating a dataset where HOURLYPrecip values are all 0 or 1
+playweather <- weather_df
+unique(playweather$HOURLYPrecip)
+playweather %>% map(~sum(is.na(.)))
+
+#Clean HOURLYPrecip column (remove "s" at the end of some values)
+playweather$HOURLYPrecip <- str_remove(playweather$HOURLYPrecip, "s$")
+unique(playweather$HOURLYPrecip)
+
+#Clean HOURLYPrecip column (replace T with 0.01)
+playweather$HOURLYPrecip <- gsub("T", 0.01, playweather$HOURLYPrecip)
+
+#convert HOURLYPrecip to <dbl>
+playweather$HOURLYPrecip <- as.numeric(playweather$HOURLYPrecip)
+
+#Change all non-zero, non-NA values to 1
+playweather$HOURLYPrecip[playweather$HOURLYPrecip != 0.0] <- 1
+
+#Change Precip NAs to 0
+playweather <- playweather %>%
+  replace_na(list(HOURLYPrecip=0))
+playweather %>% map(~sum(is.na(.)))
+glimpse(playweather)
+
+#change column names
+playweather <- rename(playweather, relative_humidity=HOURLYRelativeHumidity)
+playweather <- rename(playweather, dry_bulb_temp_f=HOURLYDRYBULBTEMPF)
+playweather <- rename(playweather, precip=HOURLYPrecip)
+playweather <- rename(playweather, wind_speed=HOURLYWindSpeed)
+playweather <- rename(playweather, station_pressure=HOURLYStationPressure)
