@@ -1,0 +1,116 @@
+#Simple Feature Scaling
+norm_weather <- weather_df
+glimpse(norm_weather)
+
+#Clean HOURLYPrecip column (remove "s" at the end of some values)
+norm_weather$HOURLYPrecip <- str_remove(norm_weather$HOURLYPrecip, "s$")
+unique(norm_weather$HOURLYPrecip)
+
+#Clean HOURLYPrecip column (replace T with 0.01)
+norm_weather$HOURLYPrecip <- gsub("T", 0.01, norm_weather$HOURLYPrecip)
+
+#convert HOURLYPrecip to <dbl>
+norm_weather$HOURLYPrecip <- as.numeric(norm_weather$HOURLYPrecip)
+
+#Change Precip NAs to 0
+norm_weather <- norm_weather %>%
+  replace_na(list(HOURLYPrecip=0))
+norm_weather %>% map(~sum(is.na(.)))
+glimpse(norm_weather)
+
+#change column names
+norm_weather <- rename(norm_weather, relative_humidity=HOURLYRelativeHumidity)
+norm_weather <- rename(norm_weather, dry_bulb_temp_f=HOURLYDRYBULBTEMPF)
+norm_weather <- rename(norm_weather, precip=HOURLYPrecip)
+norm_weather <- rename(norm_weather, wind_speed=HOURLYWindSpeed)
+norm_weather <- rename(norm_weather, station_pressure=HOURLYStationPressure)
+
+sapply(norm_weather, range, na.rm=TRUE)
+
+#Drop all other rows containing NA
+norm_weather <- norm_weather %>%
+  filter(relative_humidity !="NA",
+         wind_speed !="NA",
+         station_pressure !="NA")
+norm_weather %>% map(~sum(is.na(.)))
+
+#simple feature scaling
+norm_weather$relative_humidity <- 
+  norm_weather$relative_humidity/max(norm_weather$relative_humidity)
+norm_weather$dry_bulb_temp_f <- 
+  norm_weather$dry_bulb_temp_f/max(norm_weather$dry_bulb_temp_f)
+norm_weather$precip <- 
+  norm_weather$precip/max(norm_weather$precip)
+norm_weather$wind_speed <- 
+  norm_weather$wind_speed/max(norm_weather$wind_speed)
+norm_weather$station_pressure <- 
+  norm_weather$station_pressure/max(norm_weather$station_pressure)
+
+glimpse(norm_weather)
+sapply(norm_weather, range)
+
+#Simple linear model for each variable
+#Relative humidity
+lin_precip_relhum <- lm(precip ~ relative_humidity,
+                        data=norm_weather)
+summary(lin_precip_relhum)
+ggplot(norm_weather, aes(x=relative_humidity, y=precip)) +
+  geom_point()+
+  stat_smooth(method="lm", col="red")
+plot(lin_precip_relhum)
+
+#Dry Bulb Temperature
+lin_precip_temp <- lm(precip ~ dry_bulb_temp_f,
+                      data=norm_weather)
+summary(lin_precip_temp)
+ggplot(norm_weather, aes(x=dry_bulb_temp_f, y=precip)) +
+  geom_point()+
+  stat_smooth(method="lm", col="blue")
+plot(lin_precip_temp)
+
+#Wind Speed
+lin_precip_wind <- lm(precip ~ wind_speed,
+                      data=norm_weather)
+summary(lin_precip_wind)
+ggplot(norm_weather, aes(x=wind_speed, y=precip)) +
+  geom_point()+
+  stat_smooth(method="lm", col="purple")
+plot(lin_precip_wind)
+
+#Station Pressure
+lin_precip_pressure <- lm(precip ~ station_pressure,
+                          data=norm_weather)
+summary(lin_precip_pressure)
+ggplot(norm_weather, aes(x=station_pressure, y=precip)) +
+  geom_point()+
+  stat_smooth(method="lm", col="orange")
+plot(lin_precip_pressure)
+
+#polynomial relative_humidity
+poly_precip_relhum3 <- lm(precip ~ 
+                            poly(relative_humidity, 3, raw=TRUE),
+                          data = norm_weather)
+summary(poly_precip_relhum3)
+
+ggplot(data=norm_weather, aes(x=relative_humidity, y=precip)) +
+  geom_point()+
+  geom_smooth(method="lm", formula = y ~ poly(x,3), col="red")
+plot(poly_precip_relhum3)
+
+#polynomial station_pressure
+poly_precip_pressure2 <- lm(precip ~ 
+                            poly(station_pressure, 2, raw=TRUE),
+                          data = norm_weather)
+summary(poly_precip_pressure2)
+
+ggplot(data=norm_weather, aes(x=station_pressure, y=precip)) +
+  geom_point()+
+  geom_smooth(method="lm", formula = y ~ poly(x,2), col="red")
+plot(poly_precip_pressure2)
+
+#multiple linear regression
+mlr_norm <- lm(precip ~ relative_humidity + station_pressure, data=norm_weather)
+summary(mlr_norm)
+
+ggplot(norm_weather,aes(y=precip,x=relative_humidity,color=station_pressure))+
+  geom_point()+stat_smooth(method="lm",se=FALSE)
