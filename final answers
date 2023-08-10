@@ -36,6 +36,8 @@ sub_weather_clean["HOURLYPrecip"] <- str_remove(sub_weather_clean$HOURLYPrecip, 
 #Clean HOURLYPrecip column (replace T with 0.0)
 sub_weather_clean["HOURLYPrecip"] <- gsub("T", 0, sub_weather_clean$HOURLYPrecip)
 
+#note that NAs are dropped in task 6 after HOURLYPrecip column data type conversion
+
 unique(sub_weather_clean$HOURLYPrecip)
 clean_weather <- sub_weather_clean
 
