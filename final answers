@@ -1,0 +1,254 @@
+#1
+#download sample data
+url <- "https://dax-cdn.cdn.appdomain.cloud/dax-noaa-weather-data-jfk-airport/1.1.4/noaa-weather-sample-data.tar.gz"
+download.file(url, destfile="noaa-weather-sample-data.tar.gz")
+
+#untar the file
+untar("noaa-weather-sample-data.tar.gz")
+
+#2
+#read dataset - had to play to get location right
+project_folder <- "/Net/gac/home/b/r/brussell/C6W6FinalProject/"
+weather_df <- read_csv(paste(project_folder, "noaa-weather-sample-data/jfk_weather_sample.csv", sep=""))
+
+#preview dataset
+head(weather_df)
+
+#glimpse
+glimpse(weather_df)
+
+#3
+#select the 5 variables and save as new dataframe
+sub_weather <- select(weather_df, 
+                      c(HOURLYRelativeHumidity, HOURLYDRYBULBTEMPF,
+                        HOURLYPrecip, HOURLYWindSpeed, HOURLYStationPressure))
+
+#show 10 rows
+head(sub_weather,10)
+
+#4
+#Inspect unique values
+unique(sub_weather$HOURLYPrecip)
+
+#Clean HOURLYPrecip column (remove "s" at the end of some values)
+sub_weather_clean <- sub_weather
+sub_weather_clean["HOURLYPrecip"] <- str_remove(sub_weather_clean$HOURLYPrecip, "s$")
+
+#Clean HOURLYPrecip column (replace T with 0.0)
+sub_weather_clean["HOURLYPrecip"] <- gsub("T", 0, sub_weather_clean$HOURLYPrecip)
+
+unique(sub_weather_clean$HOURLYPrecip)
+clean_weather <- sub_weather_clean
+
+#5
+#glimpse to check col types
+glimpse(clean_weather)
+
+#convert HOURLYPrecip to <dbl>
+clean_weather$HOURLYPrecip <- as.numeric(clean_weather$HOURLYPrecip)
+
+#check that all fields are <dbl>
+glimpse(clean_weather)        
+
+#6
+#change column names
+clean_weather <- rename(clean_weather, relative_humidity=HOURLYRelativeHumidity)
+clean_weather <- rename(clean_weather, dry_bulb_temp_f=HOURLYDRYBULBTEMPF)
+clean_weather <- rename(clean_weather, precip=HOURLYPrecip)
+clean_weather <- rename(clean_weather, wind_speed=HOURLYWindSpeed)
+clean_weather <- rename(clean_weather, station_pressure=HOURLYStationPressure)
+
+#6b (If I decide to deal with NAs)
+clean_weather %>% map(~sum(is.na(.)))
+
+#Change Precip NAs to 0
+clean_weather <- clean_weather %>%
+  replace_na(list(precip=0))
+clean_weather %>% map(~sum(is.na(.)))
+
+#Drop all other rows containing NA
+clean_weather <- clean_weather %>%
+  filter(relative_humidity !="NA",
+         wind_speed !="NA",
+         station_pressure !="NA")
+clean_weather %>% map(~sum(is.na(.)))
+
+weather <- clean_weather
+
+#7
+#split data into training/testing sets, seed=1234
+set.seed(1234)
+weather_split <- initial_split(weather, prop = 0.8)
+weather_training <- training(weather_split)
+weather_testing <- testing(weather_split)
+
+#find range of all variables
+sapply(weather_training, range)
+
+#plot histo of all 5 variables using ggplot
+ggplot(data=weather_training, mapping=aes(x=relative_humidity))+
+  geom_histogram(bins=50, color="white", fill="red")+
+  coord_cartesian(xlim=c(10,110))
+ggplot(data=weather_training, mapping=aes(x=dry_bulb_temp_f))+
+  geom_histogram(bins=50, color="white", fill="blue")+
+  coord_cartesian(xlim=c(0,100))
+ggplot(data=weather_training, mapping=aes(x=precip))+
+  geom_histogram(bins=50, color="white", fill="green")+
+  coord_cartesian(xlim=c(0.0,1.20))
+ggplot(data=weather_training, mapping=aes(x=wind_speed))+
+  geom_histogram(bins=50, color="white", fill="purple")+
+  coord_cartesian(xlim=c(0,50))
+ggplot(data=weather_training, mapping=aes(x=station_pressure))+
+  geom_histogram(bins=50, color="white", fill="orange")+
+  coord_cartesian(xlim=c(28.5,31.0))
+
+#7
+#split data into training/testing sets, seed=1234
+set.seed(1234)
+weather_split <- initial_split(weather, prop = 0.8)
+weather_training <- training(weather_split)
+weather_testing <- testing(weather_split)
+
+#find range of all variables
+sapply(weather_training, range)
+
+#plot histo of all 5 variables using ggplot
+ggplot(data=weather_training, mapping=aes(x=relative_humidity))+
+  geom_histogram(bins=50, color="white", fill="red")+
+  coord_cartesian(xlim=c(10,110))
+ggplot(data=weather_training, mapping=aes(x=dry_bulb_temp_f))+
+  geom_histogram(bins=50, color="white", fill="blue")+
+  coord_cartesian(xlim=c(0,100))
+ggplot(data=weather_training, mapping=aes(x=precip))+
+  geom_histogram(bins=50, color="white", fill="green")+
+  coord_cartesian(xlim=c(0.0,1.20))
+ggplot(data=weather_training, mapping=aes(x=wind_speed))+
+  geom_histogram(bins=50, color="white", fill="purple")+
+  coord_cartesian(xlim=c(0,50))
+ggplot(data=weather_training, mapping=aes(x=station_pressure))+
+  geom_histogram(bins=50, color="white", fill="orange")+
+  coord_cartesian(xlim=c(28.5,31.0))
+
+
+#8
+#Simple linear model for each variable
+lm_spec <- linear_reg() %>%
+  set_engine(engine = "lm")
+#Relative humidity
+lin_precip_relhum <- lm(precip ~ relative_humidity,
+                        data=weather_training)
+summary(lin_precip_relhum)
+ggplot(weather_training, aes(x=relative_humidity, y=precip)) +
+  geom_point()+
+  stat_smooth(method="lm", col="red")
+
+#Dry Bulb Temperature
+lin_precip_temp <- lm(precip ~ dry_bulb_temp_f,
+                        data=weather_training)
+summary(lin_precip_temp)
+ggplot(weather_training, aes(x=dry_bulb_temp_f, y=precip)) +
+  geom_point()+
+  stat_smooth(method="lm", col="blue")
+
+#Wind Speed
+lin_precip_wind <- lm(precip ~ wind_speed,
+                        data=weather_training)
+summary(lin_precip_wind)
+ggplot(weather_training, aes(x=wind_speed, y=precip)) +
+  geom_point()+
+  stat_smooth(method="lm", col="purple")
+
+#Station Pressure
+lin_precip_pressure <- lm(precip ~ station_pressure,
+                        data=weather_training)
+summary(lin_precip_pressure)
+ggplot(weather_training, aes(x=station_pressure, y=precip)) +
+  geom_point()+
+  stat_smooth(method="lm", col="orange")
+
+#9
+#Improved model 2: multiple regression on all 4 variables
+mlr_training <- lm(precip ~ ., data=weather_training)
+summary(mlr_training)
+
+#Improved model 3: ridge regularization with grid optimization
+weather_recipe <- recipe(precip ~ ., data=weather_training)
+ridge_spec <- linear_reg(penalty=0.1, mixture=0) %>% set_engine("glmnet")
+ridge_wf <- workflow() %>% add_recipe(weather_recipe)
+ridge_fit <- ridge_wf %>%
+  add_model(ridge_spec) %>%
+  fit(data=weather_training)
+ridge_fit %>% extract_fit_parsnip() %>%
+  tidy()
+
+tune_spec <- linear_reg(penalty=tune(), mixture=0) %>%
+  set_engine('glmnet')
+weather_cvfolds <- vfold_cv(weather_training)
+lambda_grid <- grid_regular(levels=50, penalty(range=c(-3, 0.3)))
+ridge_grid <- tune_grid(ridge_wf %>%
+                          add_model(tune_spec), resamples=weather_cvfolds, 
+                        grid=lambda_grid)
+show_best(ridge_grid, metric="rmse")
+show_best(ridge_grid, metric="rsq")
+
+ridge_grid %>%
+  collect_metrics() %>%
+  filter(.metric == "rmse") %>%
+  ggplot(aes(penalty, mean)) +
+  geom_line(size=1, color="red") +
+  scale_x_log10() +
+  ggtitle("RMSE")
+
+ridge_spec2 <- linear_reg(penalty=0.001, mixture=0) %>% set_engine("glmnet")
+ridge_wf <- workflow() %>% add_recipe(weather_recipe)
+ridge_fit2 <- ridge_wf %>%
+  add_model(ridge_spec2) %>%
+  fit(data=weather_training)
+ridge_fit2 %>% extract_fit_parsnip() %>%
+  tidy()
+
+#evaluate models on testing set
+#rename fits, make copies of training/testing data
+model1fit <- lin_precip_relhum
+model2fit <- mlr_training
+model3fit <- ridge_fit2
+
+#Model 1 eval
+model1_train_results <- model1fit %>%
+  predict(new_data=weather_training) %>%
+  mutate(truth=weather_training$precip)
+model1_test_results <- model1fit %>%
+  predict(new_data=weather_testing) %>%
+  mutate(truth=weather_testing$precip)
+head(model1_test_results)
+rmse(model1_train_results, truth=truth, estimate=.pred)
+rsq(model1_train_results, truth=truth, estimate=.pred)
+rmse(model1_test_results, truth=truth, estimate=.pred)
+rsq(model1_test_results, truth=truth, estimate=.pred)
+
+#Model 2 eval
+model2_train_results <- model1fit %>%
+  predict(new_data=weather_training) %>%
+  mutate(truth=weather_training$precip)
+model2_test_results <- model1fit %>%
+  predict(new_data=weather_testing) %>%
+  mutate(truth=weather_testing$precip)
+head(model2_test_results)
+rmse(model2_train_results, truth=truth, estimate=.pred)
+rsq(model2_train_results, truth=truth, estimate=.pred)
+rmse(model2_test_results, truth=truth, estimate=.pred)
+rsq(model2_test_results, truth=truth, estimate=.pred)
+
+#Model 3 eval
+model3_train_results <- model1fit %>%
+  predict(new_data=weather_training) %>%
+  mutate(truth=weather_training$precip)
+model3_test_results <- model1fit %>%
+  predict(new_data=weather_testing) %>%
+  mutate(truth=weather_testing$precip)
+head(model3_test_results)
+rmse(model3_train_results, truth=truth, estimate=.pred)
+rsq(model3_train_results, truth=truth, estimate=.pred)
+rmse(model3_test_results, truth=truth, estimate=.pred)
+rsq(model3_test_results, truth=truth, estimate=.pred)
+
