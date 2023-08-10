@@ -226,3 +226,12 @@ rsq(model3_train_results, truth=actual, estimate=.pred)
 rmse(model3_test_results, truth=actual, estimate=.pred)
 rsq(model3_test_results, truth=actual, estimate=.pred)
 
+#create comparison table
+model_names <- c('linear_vs_rel_hum', 'mlr_all', 'mlr_all_ridge_grid')
+train_rmse <- c(0.0344, 0.0342, 0.0342)
+test_rmse <- c(0.0387, 0.0384, 0.0384)
+train_rsq <- c(0.0289, 0.0420, 0.0420)
+test_rsq <- c(0.0141, 0.0277, 0.0276)
+comparison_df <- data.frame(model_names, train_rmse, test_rmse, train_rsq, test_rsq)
+comparison_df
+
