@@ -191,7 +191,7 @@ model1_train_results <- model1fit %>%
 model1_test_results <- model1fit %>%
   predict(new_data=weather_testing) %>%
   mutate(truth=weather_testing$precip)
-head(model1_test_results)
+
 rmse(model1_train_results, truth=truth, estimate=.pred)
 rsq(model1_train_results, truth=truth, estimate=.pred)
 rmse(model1_test_results, truth=truth, estimate=.pred)
@@ -204,7 +204,7 @@ model2_train_results <- model2fit %>%
 model2_test_results <- model2fit %>%
   predict(new_data=weather_testing) %>%
   mutate(truth=weather_testing$precip)
-head(model2_test_results)
+
 rmse(model2_train_results, truth=truth, estimate=.pred)
 rsq(model2_train_results, truth=truth, estimate=.pred)
 rmse(model2_test_results, truth=truth, estimate=.pred)
@@ -217,7 +217,7 @@ model3_train_results <- model3fit %>%
 model3_test_results <- model3fit %>%
   predict(new_data=weather_testing) %>%
   mutate(truth=weather_testing$precip)
-head(model3_test_results)
+
 rmse(model3_train_results, truth=truth, estimate=.pred)
 rsq(model3_train_results, truth=truth, estimate=.pred)
 rmse(model3_test_results, truth=truth, estimate=.pred)
