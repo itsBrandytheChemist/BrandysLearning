@@ -235,3 +235,8 @@ test_rsq <- c(0.0141, 0.0277, 0.0276)
 comparison_df <- data.frame(model_names, train_rmse, test_rmse, train_rsq, test_rsq)
 comparison_df
 
+
+print(paste("All 3 models were very poor predictors of precipitation. But",
+  "to compare: Models 2 & 3 were better than Model 1 and similar to each other,", 
+  "so I would prefer to use Model 2 because it required fewer lines of code"))
+
