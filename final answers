@@ -184,7 +184,7 @@ model1fit <- lin_precip_relhum
 model2fit <- mlr_training
 model3fit <- ridge_fit2
 
-#Model 1 eval
+#Model 1 eval using mutate()
 model1_train_results <- model1fit %>%
   predict(new_data=weather_training) %>%
   mutate(truth=weather_training$precip)
@@ -197,29 +197,12 @@ rsq(model1_train_results, truth=truth, estimate=.pred)
 rmse(model1_test_results, truth=truth, estimate=.pred)
 rsq(model1_test_results, truth=truth, estimate=.pred)
 
-#Model 2 eval
-model2_train_results <- model2fit %>%
-  predict(new_data=weather_training) %>%
-  mutate(truth=weather_training$precip)
-model2_test_results <- model2fit %>%
-  predict(new_data=weather_testing) %>%
-  mutate(truth=weather_testing$precip)
+#Model 1 eval without mutate()
+model1_train_predict <- predict(model1fit, new_data=weather_training)
+model1_train_results <- data.frame(actual=weather_training$precip, predicted=model1_train_predict)
+head(model1_train_results)
 
-rmse(model2_train_results, truth=truth, estimate=.pred)
-rsq(model2_train_results, truth=truth, estimate=.pred)
-rmse(model2_test_results, truth=truth, estimate=.pred)
-rsq(model2_test_results, truth=truth, estimate=.pred)
-
-#Model 3 eval
-model3_train_results <- model3fit %>%
-  predict(new_data=weather_training) %>%
-  mutate(truth=weather_training$precip)
-model3_test_results <- model3fit %>%
-  predict(new_data=weather_testing) %>%
-  mutate(truth=weather_testing$precip)
-
-rmse(model3_train_results, truth=truth, estimate=.pred)
-rsq(model3_train_results, truth=truth, estimate=.pred)
-rmse(model3_test_results, truth=truth, estimate=.pred)
-rsq(model3_test_results, truth=truth, estimate=.pred)
+model1_test_predict <- predict(model1fit, new_data=weather_testing)
+model1_test_results <- data.frame(actual=weather_testing$precip, predicted=model1_test_predict)
+head(model1_test_results)
 
