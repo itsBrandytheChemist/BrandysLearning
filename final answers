@@ -101,33 +101,6 @@ ggplot(data=weather_training, mapping=aes(x=station_pressure))+
   geom_histogram(bins=50, color="white", fill="orange")+
   coord_cartesian(xlim=c(28.5,31.0))
 
-#7
-#split data into training/testing sets, seed=1234
-set.seed(1234)
-weather_split <- initial_split(weather, prop = 0.8)
-weather_training <- training(weather_split)
-weather_testing <- testing(weather_split)
-
-#find range of all variables
-sapply(weather_training, range)
-
-#plot histo of all 5 variables using ggplot
-ggplot(data=weather_training, mapping=aes(x=relative_humidity))+
-  geom_histogram(bins=50, color="white", fill="red")+
-  coord_cartesian(xlim=c(10,110))
-ggplot(data=weather_training, mapping=aes(x=dry_bulb_temp_f))+
-  geom_histogram(bins=50, color="white", fill="blue")+
-  coord_cartesian(xlim=c(0,100))
-ggplot(data=weather_training, mapping=aes(x=precip))+
-  geom_histogram(bins=50, color="white", fill="green")+
-  coord_cartesian(xlim=c(0.0,1.20))
-ggplot(data=weather_training, mapping=aes(x=wind_speed))+
-  geom_histogram(bins=50, color="white", fill="purple")+
-  coord_cartesian(xlim=c(0,50))
-ggplot(data=weather_training, mapping=aes(x=station_pressure))+
-  geom_histogram(bins=50, color="white", fill="orange")+
-  coord_cartesian(xlim=c(28.5,31.0))
-
 
 #8
 #Simple linear model for each variable
