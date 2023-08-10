@@ -7,9 +7,8 @@ download.file(url, destfile="noaa-weather-sample-data.tar.gz")
 untar("noaa-weather-sample-data.tar.gz")
 
 #2
-#read dataset - had to play to get location right
-project_folder <- "/Net/gac/home/b/r/brussell/C6W6FinalProject/"
-weather_df <- read_csv(paste(project_folder, "noaa-weather-sample-data/jfk_weather_sample.csv", sep=""))
+#read dataset 
+weather_df <- read_csv("noaa-weather-sample-data/jfk_weather_sample.csv")
 
 #preview dataset
 head(weather_df)
