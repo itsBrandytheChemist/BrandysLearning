@@ -58,7 +58,6 @@ clean_weather <- rename(clean_weather, precip=HOURLYPrecip)
 clean_weather <- rename(clean_weather, wind_speed=HOURLYWindSpeed)
 clean_weather <- rename(clean_weather, station_pressure=HOURLYStationPressure)
 
-#6b (If I decide to deal with NAs)
 clean_weather %>% map(~sum(is.na(.)))
 
 #Change Precip NAs to 0
