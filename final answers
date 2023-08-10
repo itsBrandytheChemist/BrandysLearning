@@ -199,10 +199,10 @@ rmse(model1_test_results, truth=truth, estimate=.pred)
 rsq(model1_test_results, truth=truth, estimate=.pred)
 
 #Model 2 eval
-model2_train_results <- model1fit %>%
+model2_train_results <- model2fit %>%
   predict(new_data=weather_training) %>%
   mutate(truth=weather_training$precip)
-model2_test_results <- model1fit %>%
+model2_test_results <- model2fit %>%
   predict(new_data=weather_testing) %>%
   mutate(truth=weather_testing$precip)
 head(model2_test_results)
@@ -212,10 +212,10 @@ rmse(model2_test_results, truth=truth, estimate=.pred)
 rsq(model2_test_results, truth=truth, estimate=.pred)
 
 #Model 3 eval
-model3_train_results <- model1fit %>%
+model3_train_results <- model3fit %>%
   predict(new_data=weather_training) %>%
   mutate(truth=weather_training$precip)
-model3_test_results <- model1fit %>%
+model3_test_results <- model3fit %>%
   predict(new_data=weather_testing) %>%
   mutate(truth=weather_testing$precip)
 head(model3_test_results)
