@@ -1,0 +1,38 @@
+#ridge regression (multiple)
+norm_recipe <- recipe(precip ~ ., data=norm_weather)
+ridge_all_spec <- linear_reg(penalty=0.1, mixture=0) %>% set_engine("glmnet")
+ridge_all_wf <- workflow()%>% add_recipe(norm_recipe)
+ridge_norm_all_fit <- ridge_all_wf %>%
+    add_model(ridge_all_spec) %>%
+    fit(data=norm_weather)
+ridge_norm_all_fit %>% extract_fit_parsnip() %>%
+  tidy()
+summary(ridge_norm_all_fit)
+
+tune_spec <- linear_reg(penalty=tune(), mixture=0) %>%
+  set_engine('glmnet')
+norm_cvfolds <- vfold_cv(norm_weather)
+lambda_grid <- grid_regular(levels=50, penalty(range=c(-3, 0.3)))
+ridge_grid <- tune_grid(ridge_all_wf %>%
+                          add_model(tune_spec), resamples=norm_cvfolds, 
+                        grid=lambda_grid)
+show_best(ridge_grid, metric="rmse")
+show_best(ridge_grid, metric="rsq")
+
+ridge_grid %>%
+  collect_metrics() %>%
+  filter(.metric == "rmse") %>%
+  ggplot(aes(penalty, mean)) +
+    geom_line(size=1, color="red") +
+    scale_x_log10() +
+    ggtitle("RMSE")
+
+ridge_all_spec <- linear_reg(penalty=0.003, mixture=0) %>% set_engine("glmnet")
+ridge_all_wf <- workflow()%>% add_recipe(norm_recipe)
+ridge_norm_all_fit <- ridge_all_wf %>%
+  add_model(ridge_all_spec) %>%
+  fit(data=norm_weather)
+ridge_norm_all_fit %>% extract_fit_parsnip() %>%
+  tidy()
+summary(ridge_norm_all_fit)
+plot(ridge_norm_all_fit)
