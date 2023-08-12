@@ -6,51 +6,46 @@ library(tidyverse)
 
 # Set up dataframe and variables
 censusdf <- read_csv("adult.csv")
-cont_var <- c("age", "hours_per_week")
 
 #Title & opening code
-shinyUI(fluidpage(
-titlePanel(title="Trends in Demographics and Income"),
-p("Explore the difference between people who earn less than 50k and more than 50k. You can filter the data by country, then explore various demographic information."),
-
-#fluidRow() layout
-    #row1: col width 12, Country select from dropdown menu
-fluidRow(
+shinyUI(fluidPage(
+  titlePanel(title="Trends in Demographics and Income"),
+  p("Explore the difference between people who earn less than 50k and more than 50k. You can filter the data by country, then explore various demographic information."),
+  
+  #fluidRow() layout
+  #row1: col width 12, Country select from dropdown menu
+  fluidRow(
     column(12, wellPanel(
-        selectInput("i_country", "Select a country to start",
-            choices = c("United States", "Canada", "Mexico", "Germany", "Philippines"),
-            selected = "United States")))),
-fluidRow(
+      selectInput(inputId = "i_country", 
+                  label = "Select a country to start",
+                  choices = c("United-States", "Canada", "Mexico", "Germany", "Philippines"),
+                  selected = "United-States")))),
+  fluidRow(
     column(3, wellPanel(
-        p("Select a continuous variable and graph type to view on the right"),
-        radioButtons(inputId="i_contvar",
-            label="Continuous variable:",
-            choices = select(censusdf, cont_var)),
-        radioButtons(inputId="i_graph",
-            label="Graph type:",
-            choices = c("boxplot", "histogram")))),
-    column(9, 
-        if(input$i_graph == "boxplot"){
-            plotOutput("p1")
-        } else {
-            plotOutput("p2")
-        }
-        )
-fluidRow(
+      p("Select a continuous variable and graph type to view on the right"),
+      radioButtons(inputId="i_contvar",
+                   label="Continuous variable:",
+                   choices = c("AGE", "HOURS_PER_WEEK"),
+                   select="AGE"),
+      radioButtons(inputId="i_graph",
+                   label="Graph type:",
+                   choices = c("Boxplot", "Histogram"),
+                   select="Boxplot"))),
+    column(9, plotOutput("p1"))),
+  fluidRow(
     column(3, wellPanel(
-        p("Select a categorical variable to view bar chart on the right. Use the stacked bar checkbox to combine the income levels into one bar."),
-        radioButtons(inputId="i_catvar",
-            label = "Categorical variable:",
-            choices = select(censusdf, -cont_var))
-        checkboxInput("i_stack", "Stack bars"))),
-    column(9, 
-        if(input$i_stack == TRUE){
-            plotOutput("p4")
-        } else {
-            plotOutput("p3")
-        }
-        ))
-
+      p("Select a categorical variable to view bar chart on the right. Use the stacked bar checkbox to combine the income levels into one bar."),
+      radioButtons(inputId="i_catvar",
+                   label = "Categorical variable:",
+                   choices = c("EDUCATION", "WORKCLASS", "SEX"),
+                   select="EDUCATION"),
+      checkboxInput(inputId="i_stack", 
+                    label = "Stacked bar graph?",
+                    value=FALSE)
+    )),
+    column(9, plotOutput("p2"))
+  )
+))
 
 
 
