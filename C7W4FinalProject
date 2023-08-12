@@ -1,4 +1,4 @@
-#ui.R - this script seems to be working as needed
+#ui.R
 
 # Import libraries
 library(shiny)
@@ -45,7 +45,7 @@ shinyUI(fluidPage(
 ))
 
 
-#server.R - still need some titles & other details... bar plot fills aren't working... it's all gray
+#server.R
 
 # Import libraries
 library(shiny)
@@ -68,14 +68,27 @@ censusdf %>% filter(native_country == input$i_country)
       ggplot(census_by_country(), 
               aes_string(y=input$i_contvar)
       ) +
-      geom_boxplot() + 
-      coord_flip() +
+      labs(title=paste("Trend of", input$i_contvar))+
+      geom_boxplot(color='deepskyblue3') + 
+        theme_light()+
+        theme(axis.text.y=element_blank(),
+              axis.ticks.y=element_blank(),
+              strip.background=element_rect(fill='deepskyblue4'),
+              strip.text=element_text(face='bold'))+
+        coord_flip() +
       facet_wrap(~prediction)
     } else {
       ggplot(census_by_country(), 
              aes_string(x=input$i_contvar)
       ) +
-      geom_histogram(binwidth=10) + 
+      geom_histogram(binwidth=10,
+                     fill='deepskyblue3',
+                     color='deepskyblue') + 
+      labs(title=paste("Trend of", input$i_contvar),
+           y="Number of people")+
+        theme_light()+
+        theme(strip.background=element_rect(fill='deepskyblue4'),
+              strip.text=element_text(face='bold'))+
       facet_wrap(~prediction)
     }
   })
@@ -83,15 +96,30 @@ censusdf %>% filter(native_country == input$i_country)
   output$p2 <- renderPlot({
     if(input$i_stack == FALSE){
       ggplot(census_by_country(), 
-                aes_string(x=input$i_catvar),
-                fill=input$i_catvar)+
+                aes_string(x=input$i_catvar,
+                           fill=input$i_catvar))+
       geom_bar(position="dodge") +
+      labs(title=paste("Trend of", input$i_catvar))+
+        theme_light()+
+        theme(axis.text.x=element_text(angle=45),
+            legend.position="bottom",
+            legend.title=element_blank(),
+            strip.background=element_rect(fill='deepskyblue4'),
+            strip.text=element_text(face='bold'))+
       facet_wrap(~prediction)
     } else {
       ggplot(census_by_country(), 
-             aes_string(x=input$i_catvar),
-             fill=prediction)+
-        geom_bar(position="stack") +
+             aes(x=""))+
+      geom_bar(position="stack",
+               aes_string(fill=input$i_catvar)) +
+        theme_light()+
+        labs(x=input$i_catvar,
+        title=paste("Trend of", input$i_catvar))+
+      theme(axis.text.x=element_text(angle=45),
+            legend.position="bottom",
+            legend.title=element_blank(),
+            strip.background=element_rect(fill='deepskyblue4'),
+            strip.text=element_text(face='bold'))+  
       facet_wrap(~prediction)
     }
   })
