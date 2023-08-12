@@ -1,0 +1,19 @@
+#ui.R plan
+
+#Title "Trends in Demographics and Income", with subtitle (paragraph?) "Explore the difference between..."
+
+#fluidRow() layout
+    #row1: col width 12, Country select from dropdown menu
+    #row2: col1: width3:
+                #header text "Select a continuous variable and graph..."
+                #radio buttons, title "Continuous" choices = "age", "hours_per_week"
+                #radio buttons, title "Graph", choices "histogram", "boxplot"
+            #col2: width 9:
+                #option 1: faceted boxplot
+                #option 2: histogram (faceted? not sure of details)
+    #row3: col1: width 3, 
+                #header text "Select a categorical variable to view..."
+                #radio buttons, title "Categorical", choices "education", "workclass", "sex"
+                #stack bars checkbox
+            #col2: width 9:
+                #plot, Title = "Trend of [variable]", faceted bar chart
