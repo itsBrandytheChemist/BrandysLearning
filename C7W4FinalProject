@@ -65,35 +65,38 @@ library(ggplot2)
 
 shinyserver(function(input,output) {
     output$p1 <- renderPlot({
-        ggplot(censusdf, 
-            aes(y=factor(!!input$i_contvar))+
-            geom_boxplot()+
-            labs(title=paste("Trend of", input$i_contvar))+
-            coord_flip()+
-            facet_wrap(~pred))
+        if(input$i_graph == "Boxplot"){
+            ggplot(censusdf, 
+                aes(y=factor(!!input$i_contvar))+
+                geom_boxplot()+
+                labs(title=paste("Trend of", input$i_contvar))+
+                coord_flip()+
+                facet_wrap(~pred))
+        } else {
+            ggplot(censusdf, 
+                aes(x=factor(!!input$i_contvar))+
+                geom_histogram()+
+                labs(title=paste("Trend of", input$i_contvar))+
+                facet_wrap(~pred))
+        }
     })
     output$p2 <- renderPlot({
-        ggplot(censusdf, 
-            aes(x=factor(!!input$i_contvar))+
-            geom_histogram()+
-            labs(title=paste("Trend of", input$i_contvar))+
-            facet_wrap(~pred))
-    })
-    output$p3 <- renderPlot({
-        ggplot(censusdf, 
-            aes(x="get this from instructions",
-                y= !!input$i_catvar,
-                fill= "get this from instructions))+
-            geom_bar(position="dodge")+
-            labs(title=paste("Trend of", input$i_catvar))+
-            facet_wrap(~pred))
-    })
-    output$p4 <- renderPlot({
-        ggplot(censusdf,
-        aes(x="", fill="get this from instructions"))+
-        geom_bar(position="stack")+
-        labs(title=paste("Trend of", input$i_catvar))+
-            facet_wrap(~pred))
+        if(input$i_stack == FALSE){
+            ggplot(censusdf, 
+                aes(x="get this from instructions",
+                    y= !!input$i_catvar,
+                    fill= "get this from instructions))+
+                geom_bar(position="dodge")+
+                labs(title=paste("Trend of", input$i_catvar))+
+                facet_wrap(~pred))
+        } else {
+            ggplot(censusdf,
+                aes(x="", 
+                    fill="get this from instructions"))+
+                geom_bar(position="stack")+
+                labs(title=paste("Trend of", input$i_catvar))+
+                facet_wrap(~pred)
+        }
     })
 })
 
