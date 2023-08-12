@@ -56,6 +56,14 @@ fluidRow(
 
 #server.R plan
 
+#how to filter by country, test plot
+ggplot(censusdf$country, 
+            aes(y=factor(!!input$i_contvar))+
+            geom_boxplot()+
+            labs(title=paste("Trend of", input$i_contvar))+
+            coord_flip()+
+            facet_wrap(~pred))
+
 # Import libraries
 library(shiny)
 library(ggplot2)
@@ -79,13 +87,18 @@ shinyserver(function(input,output) {
     output$p3 <- renderPlot({
         ggplot(censusdf, 
             aes(x="get this from instructions",
-                y= !!input$i_catvar))+
-            geom_bar()+
+                y= !!input$i_catvar,
+                fill= "get this from instructions))+
+            geom_bar(position="dodge")+
             labs(title=paste("Trend of", input$i_catvar))+
             facet_wrap(~pred))
     })
     output$p4 <- renderPlot({
-        #faceted stacked bar chart from row 3 col2
+        ggplot(censusdf,
+        aes(x="", fill="get this from instructions"))+
+        geom_bar(position="stack")+
+        labs(title=paste("Trend of", input$i_catvar))+
+            facet_wrap(~pred))
     })
 })
 
