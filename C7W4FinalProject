@@ -9,11 +9,28 @@
                 #radio buttons, title "Continuous" choices = "age", "hours_per_week"
                 #radio buttons, title "Graph", choices "histogram", "boxplot"
             #col2: width 9:
-                #option 1: faceted boxplot
-                #option 2: histogram (faceted? not sure of details)
+                #option 1: faceted boxplot ("p1")
+                #option 2: histogram (faceted? not sure of details) ("p2")
     #row3: col1: width 3, 
                 #header text "Select a categorical variable to view..."
                 #radio buttons, title "Categorical", choices "education", "workclass", "sex"
                 #stack bars checkbox
             #col2: width 9:
-                #plot, Title = "Trend of [variable]", faceted bar chart
+                #plot, Title = "Trend of [variable]", faceted bar chart ("p3")
+
+
+
+#server.R plan
+
+shinyserver(function(input,output) {
+    output$p1 <- renderPlot({
+        #faceted boxplot from row 2 col 2
+    })
+    output$p2 <- renderPlot({
+        #histogram from row 2 col2
+    })
+    output$p3 <- renderPlot({
+        #faceted bar chart from row 3 col 2
+    })
+})
+
