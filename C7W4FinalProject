@@ -1,33 +1,75 @@
 #ui.R plan
 
-#Title "Trends in Demographics and Income", with subtitle (paragraph?) "Explore the difference between..."
+# Import libraries
+library(shiny)
+library(tidyverse)
+
+# Set up dataframe and variables
+censusdf <- read_csv("adult.csv")
+cont_var <- c("age", "hours_per_week")
+
+#Title & opening code
+shinyUI(fluidpage(
+titlePanel(title="Trends in Demographics and Income"),
+p("Explore the difference between people who earn less than 50k and more than 50k. You can filter the data by country, then explore various demographic information."),
 
 #fluidRow() layout
     #row1: col width 12, Country select from dropdown menu
-    #row2: col1: width3:
-                #header text "Select a continuous variable and graph..."
-                #radio buttons, title "Continuous" choices = "age", "hours_per_week"
-                #radio buttons, title "Graph", choices "histogram", "boxplot"
-            #col2: width 9:
-                #option 1: faceted boxplot ("p1")
-                #option 2: histogram (faceted? not sure of details) ("p2")
-    #row3: col1: width 3, 
-                #header text "Select a categorical variable to view..."
-                #radio buttons, title "Categorical", choices "education", "workclass", "sex"
-                #stack bars checkbox
-            #col2: width 9:
-                #plot, Title = "Trend of [variable]", faceted bar chart ("p3")
+fluidRow(
+    column(12, wellPanel(
+        selectInput("i_country", "Select a country to start",
+            choices = c("United States", "Canada", "Mexico", "Germany", "Philippines"),
+            selected = "United States")))),
+fluidRow(
+    column(3, wellPanel(
+        p("Select a continuous variable and graph type to view on the right"),
+        radioButtons(inputId="i_contvar",
+            label="Continuous variable:",
+            choices = select(censusdf, cont_var)),
+        radioButtons(inputId="i_graph",
+            label="Graph type:",
+            choices = c("boxplot", "histogram")))),
+    column(9, 
+        if(input$i_graph == "boxplot"){
+            plotOutput("p1")
+        } else {
+            plotOutput("p2")
+        }
+        )
+fluidRow(
+    column(3, wellPanel(
+        p("Select a categorical variable to view bar chart on the right. Use the stacked bar checkbox to combine the income levels into one bar."),
+        radioButtons(inputId="i_catvar",
+            label = "Categorical variable:",
+            choices = select(censusdf, -cont_var))
+        checkboxInput("i_stack", "Stack bars"))),
+    column(9, 
+        if(input$i_stack == TRUE){
+            plotOutput("p4")
+        } else {
+            plotOutput("p3")
+        }
+        ))
+
 
 
 
 #server.R plan
 
+# Import libraries
+library(shiny)
+library(ggplot2)
+
+# Read CSV into dataframe "censusdf"
+
+#server logic
 shinyserver(function(input,output) {
     output$p1 <- renderPlot({
         #faceted boxplot from row 2 col 2
     })
     output$p2 <- renderPlot({
         #histogram from row 2 col2
+        ggplot(df
     })
     output$p3 <- renderPlot({
         #faceted bar chart from row 3 col 2
