@@ -4,8 +4,6 @@
 library(shiny)
 library(tidyverse)
 
-# Set up dataframe and variables
-censusdf <- read_csv("adult.csv")
 
 #Title & opening code
 shinyUI(fluidPage(
@@ -25,8 +23,8 @@ shinyUI(fluidPage(
       p("Select a continuous variable and graph type to view on the right"),
       radioButtons(inputId="i_contvar",
                    label="Continuous variable:",
-                   choices = c("AGE", "HOURS_PER_WEEK"),
-                   select="AGE"),
+                   choices = c("age", "hours_per_week"),
+                   select="age"),
       radioButtons(inputId="i_graph",
                    label="Graph type:",
                    choices = c("Boxplot", "Histogram"),
@@ -37,8 +35,8 @@ shinyUI(fluidPage(
       p("Select a categorical variable to view bar chart on the right. Use the stacked bar checkbox to combine the income levels into one bar."),
       radioButtons(inputId="i_catvar",
                    label = "Categorical variable:",
-                   choices = c("EDUCATION", "WORKCLASS", "SEX"),
-                   select="EDUCATION"),
+                   choices = c("education", "workclass", "sex"),
+                   select="education"),
       checkboxInput(inputId="i_stack", 
                     label = "Stacked bar graph?",
                     value=FALSE)
@@ -51,19 +49,22 @@ shinyUI(fluidPage(
 
 #server.R plan
 
-#how to filter by country, test plot
-ggplot(censusdf$country, 
-            aes(y=factor(!!input$i_contvar))+
-            geom_boxplot()+
-            labs(title=paste("Trend of", input$i_contvar))+
-            coord_flip()+
-            facet_wrap(~pred))
+
 
 # Import libraries
 library(shiny)
 library(ggplot2)
 
+# Set up dataframe and variables
+censusdf <- read_csv("adult.csv")
+names(censusdf) <- tolower(names(censusdf))
+
 shinyserver(function(input,output) {
+
+census_by_country <- reactive({
+    censusdf %>% filter(native_country == input$i_country)
+  })
+
     output$p1 <- renderPlot({
         if(input$i_graph == "Boxplot"){
             ggplot(censusdf, 
