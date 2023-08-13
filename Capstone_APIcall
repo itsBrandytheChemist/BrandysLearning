@@ -55,7 +55,5 @@ df <- data.frame(weather = weather,
 head(df)
 #this is also successful
 
-
-
-#now for multi-city for loop:
+#
 
