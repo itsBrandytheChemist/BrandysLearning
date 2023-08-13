@@ -1,1 +1,61 @@
+#code for openweathermap.org API call
+
+#library httr is required
+library(httr)
+
+#empty vectors
+city <- c()
+weather <- c()
+visibility <- c()
+temp <- c()
+temp_min <- c()
+temp_max <- c()
+pressure <- c()
+humidity <- c()
+wind_speed <- c()
+wind_deg <- c()
+forecast_datetime <- c()
+season <- c()
+
+#single city test
+forecast_weather_url <- 'https://api.openweathermap.org/data/2.5/forecast'
+your_api_key <- "1363ee93f00b5d469f690d26f7cf6026"
+forecast_query <- list(q= "Seoul", appid = your_api_key, units="metric")
+f_response <- GET(forecast_weather_url, query = forecast_query)
+f_json_result <- content(f_response, as="parsed")
+f_json_result
+
+#this gives a successful f_json_result
+
+#now try making df from f_json_result
+for(result in simple_result) {
+            weather <- c(weather, result$weather[[1]]$main)
+            visibility <- c(visibility, result$visibility)
+            temp <- c(temp, result$main$temp)
+            temp_min <- c(temp_min, result$main$temp_min)
+            temp_max <- c(temp_max, result$main$temp_max)
+            pressure <- c(pressure, result$main$pressure)
+            humidity <- c(humidity, result$main$humidity)
+            wind_speed <- c(wind_speed, result$wind$speed)
+            wind_deg <- c(wind_deg, result$wind$deg)
+            forecast_datetime <- c(forecast_datetime, result$dt)
+            season <- c(season, 'Summer') 
+}
+df <- data.frame(weather = weather,
+                         visibility = visibility,
+                         temp = temp,
+                         temp_min = temp_min,
+                         temp_max = temp_max,
+                         pressure = pressure,
+                         humidity = humidity,
+                         wind_speed = wind_speed,
+                         wind_deg = wind_deg,
+                         forecast_datetime = forecast_datetime,
+                         season = season)
+head(df)
+#this is also successful
+
+
+
+#now for multi-city for loop:
 
