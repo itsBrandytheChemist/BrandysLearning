@@ -1,0 +1,33 @@
+library(httr)
+
+get_weather_forecasting <- function(city_names) {
+  city <- weather <- visibility <- temp <- temp_min <- temp_max <- pressure <- humidity <- wind_speed <- wind_deg <- forecast_datetime <- season <- c()
+    for (city_name in city_names) {
+      forecast_url <- 'https://api.openweathermap.org/data/2.5/forecast'
+      forecast_quer <- list(q = city_name, appid = '0999031957056343b00afa47c6adec5a', units= 'metric')
+      response <- GET(forecast_url,query= forecast_quer)
+      jsonresult <- content(response, as='parsed')
+      results <- jsonresult$list
+        for (result in results) {
+          city <- c(city, city_name)
+          weather <- c(weather, result$weather[[1]]$main)
+          visibility <- c(visibility, result$visibility)
+          temp <- c(temp, result$main$temp)
+          temp_min <- c(temp_min, result$main$temp_min)
+          temp_max <- c(temp_max, result$main$temp_max)
+          pressure <- c(pressure, result$main$pressure)
+          humidity <- c(humidity, result$main$humidity)
+          wind_speed <- c(wind_speed, result$wind$speed)
+          wind_deg <- c(wind_deg, result$wind$deg)
+          forecast_datetime <- c(forecast_datetime, result$dt_txt)
+          season <- c(season, "Spring")
+        }
+    }
+    df <- data.frame(city=city, weather=weather, visibility=visibility, temp=temp, temp_min=temp_min, temp_max=temp_max, pressure=pressure, humidity=humidity, wind_speed=wind_speed, wind_deg=wind_deg, forecast_datetime= forecast_datetime, season= season)
+    return(df)
+}
+
+cities <- c('Seoul', 'Washington, D.C.', 'Paris', 'Suzhou')
+cities_weather_df <- get_weather_forecasting(cities)
+forecasting_csv <- write.csv(cities_weather_df, 'cities_weather_df.csv', row.names = FALSE)
+
