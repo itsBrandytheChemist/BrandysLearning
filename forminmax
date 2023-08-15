@@ -1,0 +1,37 @@
+#mtcars loop (it works!)
+cars <- c("mpg", "cyl")
+df <- mtcars
+
+for (car in cars) {
+    minmax <- function(car) {
+        (df$car - min(df$car))/(max(df$car) - min(df$car))
+    }
+    
+    MAX <- max(df[car])
+    print(paste(car, "max is", MAX, "to start"))
+
+    df <- df %>%
+          mutate(!!car := minmax(car))
+
+    MAX2 <- max(df[car])
+    print(paste("after normalizing, the max is", MAX2))
+}
+
+$bike data loop (it doesn't work)
+cols <- c("RENTED_BIKE_COUNT", "TEMPERATURE", "HUMIDITY", "WIND_SPEED", "VISIBILITY", "DEW_POINT_TEMPERATURE", "SOLAR_RADIATION", "RAINFALL", "SNOWFALL")
+bike_norm <- bike_convert
+
+for (col in cols) {
+    minmax <- function(col) {
+        (bike_norm[col] - min(bike_norm[col]))/(max(bike_norm[col]) - min(bike_norm[col]))
+    }
+    
+    MAX <- max(bike_norm[col])
+    print(paste(col, "max is", MAX, "to start"))
+    
+    bike_norm = bike_norm %>%
+          mutate(!!col := minmax(col))
+    
+    MAX2 <- max(bike_norm[col])
+    print(paste("after normalizing, the max is", MAX2))
+    }
