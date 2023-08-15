@@ -1,8 +1,24 @@
 #count number of rows in a table
-#SQL: select COUNT(*) from tablename
+#I have no idea why, but the code below only works if I run this code first:
+sql.info = sqlTypeInfo(conn)
+print(sql.info[c(1,3)], row.names=FALSE)
+
+#define handy variables
+schema.name <- 'NHL79077'
+tab.name <- "SEOUL_BIKE_SHARING"
+tab.fullname <- paste(schema.name, ".", tab.name, sep="", collapse="")
+
+#find available tables in db
+tab.frame <- sqlTables(conn, schema=schema.name)
+nrow(tab.frame)
+tab.frame$TABLE_NAME
+
+#query table
 query <- paste("select count(*) from SEOUL_BIKE_SHARING")
 sqlQuery(conn, query)
 
 
 #in case I need to create a df:
 seoul_df <- sqlFetch(conn, tab.fullname, stringsAsFactors=FALSE)
+
+
