@@ -1,0 +1,8 @@
+#count number of rows in a table
+#SQL: select COUNT(*) from tablename
+query <- paste("select count(*) from SEOUL_BIKE_SHARING")
+sqlQuery(conn, query)
+
+
+#in case I need to create a df:
+seoul_df <- sqlFetch(conn, tab.fullname, stringsAsFactors=FALSE)
