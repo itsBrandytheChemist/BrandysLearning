@@ -1,0 +1,114 @@
+#libraries
+library("tidymodels")
+library("tidyverse")
+library("stringr")
+library('glmnet')
+
+#clear all variables
+#rm(list=ls())
+
+#files, dataframes, and starting variables
+dataset_url <- "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-RP0321EN-SkillsNetwork/labs/datasets/seoul_bike_sharing_converted_normalized.csv"
+#download.file(dataset_url, "bike_sharing_csv")
+bike_sharing_df <- read_csv(dataset_url)
+
+bike_sharing_df <- bike_sharing_df %>% 
+  select(-DATE, -FUNCTIONING_DAY)
+
+set.seed(1234)
+data_split <- initial_split(bike_sharing_df, prop = 4/5)
+train_data <- training(data_split)
+test_data <- testing(data_split)
+
+train_cvfolds <- vfold_cv(train_data, v = 5)
+
+#fit specs
+l_spec <- linear_reg() %>%
+  set_engine("lm") %>% 
+  set_mode("regression")
+
+glmnet_spec <- linear_reg(penalty = 0.01, mixture = 0.25) %>%
+  set_engine('glmnet') %>%
+  set_mode("regression")
+
+#recipes
+top_5_recipe <- recipe(RENTED_BIKE_COUNT ~ RAINFALL + HUMIDITY + TEMPERATURE + 
+                         `18` + DEW_POINT_TEMPERATURE, data = train_data)
+top_22_recipe <- recipe(RENTED_BIKE_COUNT ~ RAINFALL + HUMIDITY + TEMPERATURE + 
+                          `18` + DEW_POINT_TEMPERATURE + `19` + `8` + `21` + 
+                          `20` + `4` + `5` + AUTUMN + `3` + `22` + `17` + `2` + 
+                          SOLAR_RADIATION + SNOWFALL + `11` + `10` + WINTER + 
+                          SPRING, data = train_data)
+
+#Model1: Top 5 variables
+model_1_recipe <- top_5_recipe
+model_1_wf <- workflow() %>%
+  add_recipe(model_1_recipe)
+model_1_fit <- model_1_wf %>%
+  add_model(l_spec) %>%
+  fit(data = train_data)
+
+#Model2: Top 22 variables
+model_2_recipe <- top_22_recipe
+model_2_wf <- workflow() %>%
+  add_recipe(model_2_recipe)
+model_2_fit <- model_2_wf %>%
+  add_model(l_spec) %>%
+  fit(data = train_data)
+
+#Model3: Top 22 variables plus polynomials
+model_3_recipe <- top_22_recipe %>%
+  step_poly(RAINFALL, HUMIDITY, degree = 2) %>%
+  step_poly(TEMPERATURE, degree = 4)
+model_3_wf <- workflow() %>%
+  add_recipe(model_3_recipe)
+model_3_fit <- model_3_wf %>%
+  add_model(l_spec) %>%
+  fit(data = train_data)
+
+#Model4: Top 22 variables plus polynomials and interactions
+model_4_recipe <- top_22_recipe %>%
+  step_interact(~ HUMIDITY:DEW_POINT_TEMPERATURE + `18`:TEMPERATURE) %>%
+  step_interact(~ SPRING:TEMPERATURE + SNOWFALL:WINTER) %>%
+  step_poly(RAINFALL, HUMIDITY, degree = 2) %>%
+  step_poly(TEMPERATURE, degree = 4)
+model_4_wf <- workflow() %>%
+  add_recipe(model_4_recipe)
+model_4_fit <- model_4_wf %>%
+  add_model(l_spec) %>%
+  fit(data = train_data)
+
+#Model 5: top 22 var, poly, inter, elastic net
+model_5_recipe <- model_4_recipe
+model_5_wf <- workflow() %>%
+  add_recipe(model_5_recipe)
+model_5_fit <- model_5_wf %>%
+  add_model(glmnet_spec) %>%
+  fit(data = train_data)
+
+#fit models to test_data and generate error table
+rsq_vect = c(deleteme = 0)
+rmse_vect = c(deleteme = 0)
+
+allFitNames <- as.vector(paste0("model_", c(1:5), "_fit"))
+
+for(fitname in allFitNames) {
+  fit <- eval(parse(text = fitname))
+  test_results <- fit %>%
+    predict(new_data = test_data) %>%
+    mutate(truth = test_data$RENTED_BIKE_COUNT)
+  test_results[test_results<0] <- 0
+  
+  test_rsq <- rsq(test_results, truth = truth, estimate = .pred)
+  test_rmse <- rmse(test_results, truth = truth, estimate = .pred)
+  
+  rsq_vect = c(rsq_vect, test_rsq$.estimate)
+  rmse_vect = c(rmse_vect, test_rmse$.estimate)
+}
+
+
+#create & view error dataframe
+error_df <- data.frame(rsq_vect, rmse_vect)
+error_df <- error_df[-1,]
+error_df['model'] <- allFitNames
+error_df
