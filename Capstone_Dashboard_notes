@@ -1,0 +1,4 @@
+#  check this out... maybe does the string/varible thing I've been looking for:
+model <- model %>% 
+    mutate(Variable = gsub('"', '', Variable))
+
