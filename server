@@ -1,0 +1,90 @@
+# libraries
+require(shiny)
+require(ggplot2)
+require(leaflet)
+require(tidyverse)
+require(httr)
+require(scales)
+
+# Import model_prediction R which returns cities_bike_pred
+source("model_prediction.R")
+
+shinyServer(function(input, output) {
+ 
+  #color_levels for main map
+  color_levels <- colorFactor(c("green", "yellow", "red"), 
+                              levels = c("small", "medium", "large"))
+  
+  #create cities_max_bike
+  city_weather_bike_df<-generate_city_weather_bike_data()
+  city_weather_bike_df$FORECASTDATETIME <- as.POSIXct(city_weather_bike_df$FORECASTDATETIME, "%Y-%m-%d %H:%M:%S")
+  city_weather_bike_df$BIKE_PREDICTION_LEVEL <- as.factor(city_weather_bike_df$BIKE_PREDICTION_LEVEL)
+  city_weather_bike_df$BIKE_PREDICTION_LEVEL <- ordered(city_weather_bike_df$BIKE_PREDICTION_LEVEL, 
+                                                        levels = c('small', 'medium', 'large'))
+  
+  cities_max_bike <- city_weather_bike_df %>%
+    group_by(CITY_ASCII, LNG, LAT) %>%
+    summarize(max(BIKE_PREDICTION), first(LABEL), first(DETAILED_LABEL),
+              max(BIKE_PREDICTION_LEVEL))
+  
+  # Observe city choice and render desired map
+  
+  observeEvent(input$i_city, {
+    if(input$i_city != 'All') {
+      
+      selected <- cities_max_bike['CITY_ASCII'] == input$i_city
+      
+      output$city_bike_map <- renderLeaflet({
+      leaflet(cities_max_bike) %>% 
+        addTiles() %>%
+        addMarkers(lng = cities_max_bike$LNG[selected], lat = cities_max_bike$LAT[selected],
+                   popup = cities_max_bike$`first(DETAILED_LABEL)`[selected])
+      })
+      
+      subset_df <- subset(city_weather_bike_df, CITY_ASCII == input$i_city)
+      
+      output$temp_line <- renderPlot({
+        ggplot(subset_df, aes(x = FORECASTDATETIME, y = TEMPERATURE, 
+                              label = paste(" ", TEMPERATURE, 'C '), hjust = 'inward')) +
+          geom_line(linewidth = 1, color = 'yellow') +
+          geom_point(size = .5) +
+          geom_text(size = 3, check_overlap = TRUE) +
+          labs(title = 'Temperature & Bike Rental Forecast', 
+               x = 'Time (3 hrs ahead)', y = 'Temperature (C)')
+      })
+      
+      output$bike_line <- renderPlot({
+        ggplot(subset_df, aes(x = FORECASTDATETIME, y = BIKE_PREDICTION, 
+                              label = paste(" ", BIKE_PREDICTION, " "), hjust = 'inward')) +
+          geom_line(linewidth = 1, color = 'cyan4', linetype = 'dashed') +
+          geom_point(size = 1) +
+          geom_text(size = 3, check_overlap = TRUE) +
+          labs(x = 'Time (3 hrs ahead)', y = 'Predicted Bike Count')
+          
+      })
+      
+      output$bike_date_output <- renderText(
+        print('hello!')
+      )
+      
+      output$humidity_pred_chart <- renderPlot({
+        ggplot(subset_df, aes(x = HUMIDITY, y = BIKE_PREDICTION)) +
+          geom_point() +
+          geom_smooth(method = 'lm', formula = y ~ poly(x, 4))+
+          labs(x = 'Humidity', y = 'Predicted Bike Count')
+      })
+      
+    } else {
+      
+      output$city_bike_map <- renderLeaflet({
+        leaflet(cities_max_bike) %>% 
+          addTiles() %>%
+          addCircleMarkers(lng = cities_max_bike$LNG, lat = cities_max_bike$LAT,
+                           popup = cities_max_bike$`first(LABEL)`,
+                           color = ~color_levels(`max(BIKE_PREDICTION_LEVEL)`),
+                           radius = ~ifelse(`max(BIKE_PREDICTION_LEVEL)` == "small", 6, 
+                                            ifelse(`max(BIKE_PREDICTION_LEVEL)` == "medium", 10, 12)))
+      })
+    }
+  })
+})
