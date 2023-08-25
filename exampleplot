@@ -1,0 +1,27 @@
+##more customization and annotation
+#note shifting axis titles right and down to look better
+
+ggplot(sorted_coeff_all, aes(x = values, y = ind)) +
+    geom_bar(stat = 'identity', fill = 'deepskyblue4') +
+    theme_light()+
+    xlab('|coefficients|') +
+    ylab('independent variables') +
+    ggtitle('Weather & date/time predictors')+
+    theme(axis.text.x = element_text(size = 12),
+          title = element_text(size = 16),
+          plot.title = element_text(hjust = 0.5),
+         axis.title.x = element_text(margin = margin(t = 10)),
+         axis.title.y = element_text(margin = margin(r = -15)))+
+    annotate(geom = 'text', label = '#1: Rainfall',
+             x = 1000, y = 34, hjust = 0, color = 'red', size = 8) + 
+    annotate(geom = 'text', label = '#2: Humidity',
+             x = 1000, y = 31.5, hjust = 0, color = 'red', size = 8) + 
+    annotate(geom = 'text', label = '#3: Temp',
+             x = 1000, y = 29, hjust = 0, color = 'red', size = 8) + 
+    annotate(geom = 'text', label = '#4: 6:00 pm',
+             x = 1000, y = 26.5, hjust = 0, color = 'red', size = 8) + 
+    annotate(geom = 'text', label = '#5: Dew Point',
+             x = 1000, y = 24, hjust = 0, color = 'red', size = 8)
+
+#uncomment code below to save
+#ggsave('figure7c.png')
