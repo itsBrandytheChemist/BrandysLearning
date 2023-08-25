@@ -1,0 +1,39 @@
+#melt and facet-wrap w/lots of customization
+#note that I have had trouble using melt.data.frame() with other dataframes
+
+library(MASS) 
+library(reshape2) 
+library(reshape) 
+
+#It would be cool if these two plots were stacked vertically and had only 1 x axis
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point()
+ggplot(mtcars, aes(x = wt, y = qsec))+
+  geom_point()
+
+#use melt.data.frame - this essentially doubles the length of the dataframe, and creates two new columns:
+#values = a single column out of 'mpg' and 'qsec' values
+#variables = a column of two possible factors: 'mpg' and 'qsec'
+
+head(mtcars)
+melt_cars <- melt.data.frame(mtcars, measure.vars = c('mpg', 'qsec'))
+head(melt_cars)
+
+#now you can use facet_wrap() function to create those two plots:
+ggplot(melt_cars, aes(x = wt, y = value))+
+  geom_point()+
+  facet_wrap(~variable, ncol=1, strip.position = 'left', scales = 'free_y')
+  
+#and here's a bunch of customization ideas
+ggplot(melt_cars, aes(x = wt, y = value))+
+  geom_point()+
+  facet_wrap(~variable, ncol=1, strip.position = 'left', scales = 'free_y')+
+  labs(x = 'Weight', y = NULL)+
+  theme(axis.text.x = element_text(size= 12, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 12),
+        title = element_text(size = 18),
+        legend.title = element_text(size = 14),
+        strip.text.y = element_text(size = 16),
+        strip.placement = 'outside',
+        plot.title = element_text(hjust = 0.5))
+
