@@ -1,0 +1,27 @@
+#example code with lots of customization - you won't be able to run this without the data, but you can read ;)
+#
+#notice the stat_qq() and geom_qq_line() layers (lines 13-16) are from different dataframes
+#the "sample" aesthetic is used in these qq plots, not sure where else, but I bet this method would work with x =, y =?
+#also, colors are set in a way that you get a legend with the titles you want (line 11, line 25, see also 'color =' in lines 13-15).
+#The legend  is inside the plot (line 24)
+#ggsave() is a good way to make a figure with the proportions and size you want (line 27)
+
+
+
+colors <- c('Actual' = 'green', 'Predicted - no negative values' = 'red', 'Predicted - original' = 'pink')
+ggplot() + 
+  stat_qq(aes(sample = model_4_results_w_negatives$.pred, color='Predicted - original'), alpha = 0.5)+
+  stat_qq(aes(sample = model_4_results$truth, color='Actual'), alpha = 0.5) +
+  stat_qq(aes(sample = model_4_results$.pred, color='Predicted - no negative values'), alpha = 0.5) + 
+  geom_qq_line(aes(sample = model_4_results_w_negatives$.pred))+
+  theme_light()+
+  labs(title = 'Q-Q Plot', color = 'Number of bikes')+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        title = element_text(size = 18),
+        legend.title = element_text(size = 14),
+        plot.title = element_text(hjust = 0.5),
+        legend.position = c(0.8, 0.1))+
+  scale_color_manual(values = colors)
+
+ggsave(file="figure6b.png", width = 4, height = 6, dpi = 300)
