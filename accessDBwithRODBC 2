@@ -7,8 +7,8 @@ dsn_database = "bludb"
 dsn_hostname = "b0aebb68-94fa-46ec-a1fc-1c999edb6187.c3n41cmd0nqnrk39u98g.databases.appdomain.cloud"    #from my db instance
 dsn_port = "31249"  #from my db instance
 dsn_protocol = "TCPIP"            
-dsn_uid = "nhl79077"  #from my db instance
-dsn_pwd = "xacZ3RkpGprJW4Nj"  #from my db instance credentials
+dsn_uid = "XXX"  #from my db instance
+dsn_pwd = "XXX"  #from my db instance credentials
 dsn_security = "ssl"
 
 #DB connection string and connection
